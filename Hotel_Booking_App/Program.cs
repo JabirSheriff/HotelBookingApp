@@ -1,4 +1,4 @@
-using Hotel_Booking_App.Contexts;
+﻿using Hotel_Booking_App.Contexts;
 using Hotel_Booking_App.Interface;
 using Hotel_Booking_App.Interface.Hotel_Room;
 using Hotel_Booking_App.Repositories;
@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Hotel_Booking_App.Mappings;
+using Hotel_Booking_App.Interface.Bookings;
+
 
 namespace Hotel_Booking_App
 {
@@ -21,6 +23,7 @@ namespace Hotel_Booking_App
 
             // Register AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));
+            builder.Services.AddHttpContextAccessor();
 
             // Load configuration (ensure it's properly loaded)
             var configuration = builder.Configuration;
@@ -60,6 +63,8 @@ namespace Hotel_Booking_App
                 });
             });
 
+            
+
             // Ensure connection string is loaded correctly
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             if (string.IsNullOrEmpty(connectionString))
@@ -79,10 +84,21 @@ namespace Hotel_Booking_App
             builder.Services.AddScoped<IHotelService, HotelService>();
             builder.Services.AddScoped<IHotelRepository, HotelRepository>();
 
-            builder.Services.AddAutoMapper(typeof(Program));
+            builder.Services.AddScoped<IRoomService, RoomService>();
+            builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 
 
+            //builder.Services.AddAutoMapper(typeof(Program));
+
+
+            // ✅ Configure Authentication & JWT
+            var jwtSecret = configuration["Jwt:Secret"];
+            if (string.IsNullOrEmpty(jwtSecret))
+                throw new ArgumentNullException("Jwt:Secret is missing in appsettings.json.");
 
             // Authentication & JWT Setup
             var key = Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]);

@@ -87,6 +87,14 @@ namespace Hotel_Booking_App.Contexts
                 .HasForeignKey(b => b.HotelId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Booking>()
+                .HasMany(b => b.BookingRooms)
+                .WithOne()
+                .HasForeignKey(br => br.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+
             modelBuilder.Entity<BookingRoom>()
                 .HasKey(br => new { br.BookingId, br.RoomId });
 

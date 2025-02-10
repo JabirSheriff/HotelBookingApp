@@ -9,5 +9,6 @@ namespace Hotel_Booking_App.Interface.Hotel_Room
         Task<HotelResponseDto?> GetHotelByIdAsync(int hotelId);
         Task<bool> UpdateHotelAsync(int hotelId, AddHotelDto dto);
         Task<bool> DeleteHotelAsync(int hotelId);
+        Task<List<HotelResponseDto>> SearchHotelsWithRoomsAsync(RoomSearchRequestDto request);
     }
 }

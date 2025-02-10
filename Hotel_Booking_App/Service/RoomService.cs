@@ -18,44 +18,77 @@ namespace Hotel_Booking_App.Services
             _mapper = mapper;
         }
 
-        public async Task<RoomResponseDto> AddRoomAsync(AddRoomDto dto)
+        // ✅ Add Room
+        public async Task<RoomResponseDto> AddRoomAsync(int ownerId, RoomRequestDto dto)
         {
             var hotel = await _hotelRepository.GetHotelByIdAsync(dto.HotelId);
-            if (hotel == null) throw new Exception("Hotel not found.");
+            if (hotel == null || hotel.HotelOwnerId != ownerId)
+            {
+                throw new UnauthorizedAccessException("You can only add rooms to your own hotels.");
+            }
 
             var room = _mapper.Map<Room>(dto);
+            room.HotelId = hotel.Id;  // ✅ Explicitly set HotelId
+
             await _roomRepository.AddRoomAsync(room);
             await _roomRepository.SaveChangesAsync();
 
             return _mapper.Map<RoomResponseDto>(room);
         }
 
-        public async Task<bool> UpdateRoomAsync(int roomId, AddRoomDto dto)
-        {
-            var room = await _roomRepository.GetRoomByIdAsync(roomId);
-            if (room == null) return false;
 
-            _mapper.Map(dto, room);
-            await _roomRepository.UpdateRoomAsync(room);
-            return await _roomRepository.SaveChangesAsync();
-        }
-
-        public async Task<bool> DeleteRoomAsync(int roomId)
-        {
-            await _roomRepository.DeleteRoomAsync(roomId);
-            return await _roomRepository.SaveChangesAsync();
-        }
-
+        // ✅ Get Rooms By Hotel ID
         public async Task<IEnumerable<RoomResponseDto>> GetRoomsByHotelIdAsync(int hotelId)
         {
             var rooms = await _roomRepository.GetRoomsByHotelIdAsync(hotelId);
             return _mapper.Map<IEnumerable<RoomResponseDto>>(rooms);
         }
 
-        public async Task<RoomResponseDto?> GetRoomByIdAsync(int roomId)
+        // ✅ Update Room
+        public async Task<RoomResponseDto> UpdateRoomAsync(int ownerId, int roomId, RoomRequestDto dto)
         {
             var room = await _roomRepository.GetRoomByIdAsync(roomId);
-            return room != null ? _mapper.Map<RoomResponseDto>(room) : null;
+            if (room == null)
+            {
+                throw new KeyNotFoundException("Room not found.");
+            }
+
+            var hotel = await _hotelRepository.GetHotelByIdAsync(room.HotelId);
+            if (hotel == null || hotel.HotelOwnerId != ownerId)
+            {
+                throw new UnauthorizedAccessException("You can only update rooms in your own hotels.");
+            }
+
+            // Update room properties
+            _mapper.Map(dto, room);
+
+            await _roomRepository.UpdateRoomAsync(room);
+            await _roomRepository.SaveChangesAsync();
+
+            return _mapper.Map<RoomResponseDto>(room);
         }
+
+
+        // ✅ Delete Room
+        public async Task<bool> DeleteRoomAsync(int ownerId, int roomId)
+        {
+            var room = await _roomRepository.GetRoomByIdAsync(roomId);
+            if (room == null)
+            {
+                return false; // Room not found
+            }
+
+            var hotel = await _hotelRepository.GetHotelByIdAsync(room.HotelId);
+            if (hotel == null || hotel.HotelOwnerId != ownerId)
+            {
+                return false; // Unauthorized access
+            }
+
+            await _roomRepository.DeleteRoomAsync(room);
+            await _roomRepository.SaveChangesAsync();
+            return true; // Successfully deleted
+        }
+
     }
+
 }

@@ -4,6 +4,7 @@ using Hotel_Booking_App.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hotel_Booking_App.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    partial class HotelBookingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250210100509_specialrequestnullable")]
+    partial class specialrequestnullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -201,9 +204,6 @@ namespace Hotel_Booking_App.Migrations
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
-                    b.Property<int>("BookingId2")
-                        .HasColumnType("int");
-
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
@@ -366,14 +366,14 @@ namespace Hotel_Booking_App.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 2, 10, 12, 42, 13, 963, DateTimeKind.Utc).AddTicks(9147),
+                            CreatedAt = new DateTime(2025, 2, 10, 10, 5, 8, 847, DateTimeKind.Utc).AddTicks(2355),
                             Email = "admin@gmail.com",
                             FullName = "Admin",
-                            PasswordHash = new byte[] { 103, 77, 41, 129, 51, 18, 24, 246, 203, 80, 21, 236, 189, 140, 56, 174, 91, 224, 24, 233, 94, 140, 16, 139, 12, 166, 63, 249, 69, 156, 195, 64, 141, 98, 236, 195, 193, 217, 228, 148, 81, 233, 178, 151, 191, 9, 245, 167, 119, 248, 2, 237, 228, 78, 240, 67, 16, 20, 44, 115, 227, 213, 207, 38 },
-                            PasswordSalt = new byte[] { 123, 97, 124, 149, 221, 231, 46, 16, 212, 0, 123, 217, 246, 217, 230, 216, 228, 197, 112, 123, 59, 109, 150, 12, 101, 236, 218, 135, 250, 236, 133, 1, 41, 225, 139, 78, 193, 39, 136, 177, 78, 156, 173, 12, 210, 161, 154, 117, 12, 73, 253, 124, 210, 165, 240, 159, 58, 77, 200, 85, 178, 94, 199, 247, 6, 10, 132, 208, 177, 219, 160, 245, 198, 121, 240, 34, 225, 48, 134, 205, 220, 194, 220, 73, 102, 179, 130, 114, 40, 88, 178, 94, 64, 193, 245, 10, 228, 177, 213, 124, 78, 81, 42, 100, 233, 189, 227, 40, 149, 67, 225, 250, 178, 197, 95, 6, 177, 203, 104, 240, 111, 143, 121, 105, 205, 117, 188, 200 },
+                            PasswordHash = new byte[] { 219, 155, 83, 183, 178, 213, 255, 115, 5, 14, 187, 152, 78, 61, 153, 38, 212, 193, 78, 228, 174, 45, 6, 184, 98, 44, 82, 6, 54, 56, 156, 51, 54, 41, 111, 91, 239, 213, 124, 123, 126, 133, 190, 254, 221, 65, 127, 61, 95, 74, 20, 194, 67, 200, 97, 66, 71, 249, 124, 134, 62, 201, 59, 31 },
+                            PasswordSalt = new byte[] { 181, 150, 153, 116, 214, 13, 67, 198, 145, 169, 40, 240, 7, 69, 230, 179, 183, 111, 6, 50, 3, 152, 234, 238, 93, 199, 25, 81, 194, 10, 156, 159, 118, 172, 131, 77, 31, 169, 219, 8, 12, 238, 62, 20, 22, 206, 191, 22, 173, 84, 9, 215, 234, 161, 198, 182, 59, 192, 33, 53, 89, 66, 81, 194, 56, 170, 170, 243, 166, 173, 196, 2, 69, 144, 86, 203, 122, 204, 39, 62, 228, 226, 120, 241, 139, 86, 133, 61, 246, 222, 18, 36, 35, 158, 137, 173, 164, 8, 70, 128, 164, 129, 149, 99, 158, 25, 33, 184, 126, 47, 105, 196, 174, 169, 140, 56, 19, 202, 227, 147, 203, 111, 138, 220, 229, 251, 255, 98 },
                             PhoneNumber = "7397388965",
                             Role = "Admin",
-                            UpdatedAt = new DateTime(2025, 2, 10, 12, 42, 13, 963, DateTimeKind.Utc).AddTicks(9148)
+                            UpdatedAt = new DateTime(2025, 2, 10, 10, 5, 8, 847, DateTimeKind.Utc).AddTicks(2356)
                         });
                 });
 

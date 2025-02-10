@@ -7,5 +7,6 @@
         public string Role { get; set; }  // ✅ Add Role
         public string Message { get; set; }
         public string Token { get; set; }
+        public int? HotelOwnerId { get; set; }
     }
 }

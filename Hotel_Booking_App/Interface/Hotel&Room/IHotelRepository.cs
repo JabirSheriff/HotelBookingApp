@@ -9,6 +9,7 @@ namespace Hotel_Booking_App.Interface.Hotel_Room
         Task<Hotel?> GetHotelByIdAsync(int hotelId);
         Task UpdateHotelAsync(Hotel hotel);
         Task DeleteHotelAsync(int hotelId);
+        Task<List<Hotel>> GetHotelsWithRoomsAsync(string city, string country, decimal? maxPrice);
         Task<bool> SaveChangesAsync();
     }
 }

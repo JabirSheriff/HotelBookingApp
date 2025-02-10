@@ -4,10 +4,9 @@ namespace Hotel_Booking_App.Interface.Hotel_Room
 {
     public interface IRoomService
     {
-        Task<RoomResponseDto> AddRoomAsync(AddRoomDto dto);
+        Task<RoomResponseDto> AddRoomAsync(int ownerId, RoomRequestDto dto);
         Task<IEnumerable<RoomResponseDto>> GetRoomsByHotelIdAsync(int hotelId);
-        Task<RoomResponseDto?> GetRoomByIdAsync(int roomId);
-        Task<bool> UpdateRoomAsync(int roomId, AddRoomDto dto);
-        Task<bool> DeleteRoomAsync(int roomId);
+        Task<RoomResponseDto> UpdateRoomAsync(int ownerId, int roomId, RoomRequestDto dto);
+        Task<bool> DeleteRoomAsync(int ownerId, int roomId);
     }
 }

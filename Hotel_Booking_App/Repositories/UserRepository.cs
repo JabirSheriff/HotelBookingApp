@@ -58,6 +58,12 @@ namespace Hotel_Booking_App.Repositories
             }
         }
 
+        public async Task<HotelOwner> GetHotelOwnerByUserIdAsync(int userId)
+        {
+            return await _context.HotelOwners.FirstOrDefaultAsync(h => h.UserId == userId);
+        }
+
+
         public async Task<bool> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync() > 0;

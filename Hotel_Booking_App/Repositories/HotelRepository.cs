@@ -38,6 +38,7 @@ namespace Hotel_Booking_App.Repositories
         public async Task UpdateHotelAsync(Hotel hotel)
         {
             _context.Hotels.Update(hotel);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteHotelAsync(int hotelId)
@@ -45,7 +46,24 @@ namespace Hotel_Booking_App.Repositories
             var hotel = await GetHotelByIdAsync(hotelId);
             if (hotel != null)
                 _context.Hotels.Remove(hotel);
+            await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Hotel>> GetHotelsWithRoomsAsync(string city, string country, decimal? maxPrice)
+        {
+            var query = _context.Hotels
+                .Include(h => h.Rooms)
+                .Where(h => h.City == city && h.Country == country && h.Rooms.Any(r => r.IsAvailable))
+                .AsQueryable();
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(h => h.Rooms.Any(r => r.PricePerNight <= maxPrice.Value));
+            }
+
+            return await query.ToListAsync();
+        }
+
 
         public async Task<bool> SaveChangesAsync()
         {

@@ -27,6 +27,7 @@ namespace Hotel_Booking_App.Models
 
         [Required]
         public int Capacity { get; set; }
+        
 
         // ✅ Fixed Foreign Key for Hotel
         [Required]
@@ -36,6 +37,7 @@ namespace Hotel_Booking_App.Models
 
         // ✅ Many-to-Many Relationship with Booking
         public ICollection<BookingRoom> BookingRooms { get; set; } = new List<BookingRoom>();
+        
     }
 
     public enum RoomType

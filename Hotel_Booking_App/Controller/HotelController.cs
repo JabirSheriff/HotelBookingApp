@@ -57,5 +57,19 @@ namespace Hotel_Booking_App.Controllers
             if (!success) return NotFound("Hotel not found.");
             return Ok("Hotel deleted successfully.");
         }
+
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SearchHotelsWithRooms([FromQuery] RoomSearchRequestDto request)
+        {
+            var hotels = await _hotelService.SearchHotelsWithRoomsAsync(request);
+
+            if (hotels == null || !hotels.Any())
+            {
+                return NotFound("No hotels found matching the search criteria.");
+            }
+
+            return Ok(hotels);
+        }
     }
 }

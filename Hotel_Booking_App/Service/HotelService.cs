@@ -35,7 +35,7 @@ namespace Hotel_Booking_App.Services
 
             return _mapper.Map<HotelResponseDto>(hotel);
         }
-        
+
 
 
         // ✅ Get all hotels owned by the logged-in owner
@@ -71,6 +71,13 @@ namespace Hotel_Booking_App.Services
 
             await _hotelRepository.DeleteHotelAsync(hotelId);
             return await _hotelRepository.SaveChangesAsync();
+        }
+
+        public async Task<List<HotelResponseDto>> SearchHotelsWithRoomsAsync(RoomSearchRequestDto request)
+        {
+            var hotels = await _hotelRepository.GetHotelsWithRoomsAsync(request.City, request.Country, request.MaxPrice);
+
+            return _mapper.Map<List<HotelResponseDto>>(hotels);
         }
     }
 }

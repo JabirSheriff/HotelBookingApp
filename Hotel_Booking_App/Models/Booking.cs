@@ -33,20 +33,24 @@ namespace Hotel_Booking_App.Models
         [Required]
         public BookingStatus Status { get; set; } = BookingStatus.Pending; // Default status is Pending
 
-        public string SpecialRequest { get; set; }
+        public string? SpecialRequest { get; set; }
+
+       
 
         // ✅ Many-to-Many Relationship with Room
         public ICollection<BookingRoom> BookingRooms { get; set; } = new List<BookingRoom>();
 
         // ✅ One-to-One Relationship with Payment
         public Payment Payment { get; set; }
+       
+        
     }
 
     public enum BookingStatus
     {
         Pending,
-        Confirmed,
-        Cancelled,
-        Completed
+        Paid,
+        Cancelled
+        
     }
 }

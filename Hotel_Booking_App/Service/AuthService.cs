@@ -79,6 +79,14 @@ namespace Hotel_Booking_App.Service
                 };
             }
 
+            // ✅ Fetch HotelOwner ID
+            int? hotelOwnerId = null;
+            if (user.Role == "HotelOwner")
+            {
+                var hotelOwner = await _userRepository.GetHotelOwnerByUserIdAsync(user.Id);
+                hotelOwnerId = hotelOwner?.Id;  // Get HotelOwner ID
+            }
+
             // 🔥 Ensure JWT Secret Key is loaded properly
             var secretKey = _configuration["Jwt:Secret"];
             if (string.IsNullOrEmpty(secretKey))
@@ -89,10 +97,13 @@ namespace Hotel_Booking_App.Service
             // ✅ Add Role, Email, and ID claims properly
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim("nameId", user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
             };
+
+            if (hotelOwnerId.HasValue)
+                claims.Add(new Claim("hotelOwnerId", hotelOwnerId.Value.ToString()));
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -119,6 +130,7 @@ namespace Hotel_Booking_App.Service
                 FullName = user.FullName,  // ✅ Send Full Name
                 Email = user.Email,  // ✅ Send Email
                 Role = user.Role,
+                HotelOwnerId = hotelOwnerId,
                 Message = welcomeMessage,
                 Token = jwtToken
             };
