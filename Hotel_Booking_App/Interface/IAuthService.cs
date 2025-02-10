@@ -7,5 +7,8 @@ namespace Hotel_Booking_App.Interface
     {
         Task<UserRegistrationResponseDto> RegisterAsync(UserRegistrationDto userregistrationDto);
         Task<LoginResponseDto> LoginAsync(LoginDto loginDto);
+        Task<UserRegistrationResponseDto> RegisterCustomerAsync(UserRegistrationDto userregistrationDto);
+        Task<bool> UpdateUserProfileAsync(int userId, UpdateUserDto updateUserDto);
+
     }
 }

@@ -70,8 +70,12 @@ namespace Hotel_Booking_App.Service
             {
                 return new LoginResponseDto
                 {
+
                     Message = "Login successful, but role is not assigned. Please contact Admin.",
-                    Token = null
+                    Token = null,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    Role = user.Role
                 };
             }
 
@@ -112,9 +116,84 @@ namespace Hotel_Booking_App.Service
 
             return new LoginResponseDto
             {
+                FullName = user.FullName,  // ✅ Send Full Name
+                Email = user.Email,  // ✅ Send Email
+                Role = user.Role,
                 Message = welcomeMessage,
                 Token = jwtToken
             };
         }
+
+        public async Task<UserRegistrationResponseDto> RegisterCustomerAsync(UserRegistrationDto userRegistrationDto)
+        {
+            var existingUser = await _userRepository.GetUserByEmailAsync(userRegistrationDto.Email);
+            if (existingUser != null)
+                throw new Exception("User already exists.");
+
+            using var hmac = new HMACSHA512();
+            var passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(userRegistrationDto.Password));
+            var passwordSalt = hmac.Key;
+
+            var user = new User
+            {
+                FullName = userRegistrationDto.FullName,
+                Email = userRegistrationDto.Email,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                PhoneNumber = userRegistrationDto.PhoneNumber,
+                Role = "Customer"  // Automatically set role to Customer
+            };
+
+            await _userRepository.AddUserAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+            var customer = new Customer
+            {
+                UserId = user.Id,  // ✅ Associate customer with the User
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+            };
+
+            await _userRepository.AddCustomerAsync(customer); // ✅ Save customer details
+            await _userRepository.SaveChangesAsync();
+
+            return new UserRegistrationResponseDto
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+                Role = user.Role,
+                PhoneNumber = user.PhoneNumber,
+            };
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(int userId, UpdateUserDto updateUserDto)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+
+            // Update only non-null values
+            if (!string.IsNullOrEmpty(updateUserDto.FullName))
+                user.FullName = updateUserDto.FullName;
+
+            if (!string.IsNullOrEmpty(updateUserDto.Email))
+                user.Email = updateUserDto.Email;
+
+            if (!string.IsNullOrEmpty(updateUserDto.PhoneNumber))
+                user.PhoneNumber = updateUserDto.PhoneNumber;
+
+            if (!string.IsNullOrEmpty(updateUserDto.Password))
+            {
+                using var hmac = new HMACSHA512();
+                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(updateUserDto.Password));
+                user.PasswordSalt = hmac.Key;
+            }
+
+            await _userRepository.SaveChangesAsync();
+            return true;
+        }
+
+
     }
 }

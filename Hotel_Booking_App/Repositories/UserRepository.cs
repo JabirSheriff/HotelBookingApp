@@ -22,7 +22,7 @@ namespace Hotel_Booking_App.Repositories
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<User?> GetUserByIdAsync(int id)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
@@ -35,6 +35,11 @@ namespace Hotel_Booking_App.Repositories
         public async Task AddUserAsync(User user)
         {
             await _context.Users.AddAsync(user);
+        }
+
+        public async Task AddCustomerAsync(Customer customer)
+        {
+            await _context.Customers.AddAsync(customer);
         }
 
         public async Task UpdateUserAsync(User user)

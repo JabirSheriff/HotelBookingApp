@@ -35,5 +35,9 @@ namespace Hotel_Booking_App.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // ✅ Navigation Properties
+        public Customer Customer { get; set; }
+        public HotelOwner HotelOwner { get; set; }
     }
 }

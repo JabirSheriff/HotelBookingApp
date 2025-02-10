@@ -4,6 +4,7 @@ using Hotel_Booking_App.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hotel_Booking_App.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    partial class HotelBookingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250209191701_nullable")]
+    partial class nullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -364,14 +367,14 @@ namespace Hotel_Booking_App.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 2, 9, 19, 38, 59, 818, DateTimeKind.Utc).AddTicks(384),
+                            CreatedAt = new DateTime(2025, 2, 9, 19, 17, 0, 350, DateTimeKind.Utc).AddTicks(3706),
                             Email = "admin@gmail.com",
                             FullName = "Admin",
-                            PasswordHash = new byte[] { 128, 14, 239, 10, 143, 153, 163, 143, 96, 96, 217, 69, 241, 203, 42, 27, 94, 231, 243, 17, 134, 27, 195, 184, 43, 211, 108, 86, 14, 238, 220, 253, 67, 213, 152, 152, 25, 202, 26, 101, 164, 227, 181, 139, 68, 226, 213, 130, 12, 68, 17, 153, 138, 130, 211, 6, 212, 116, 181, 133, 167, 100, 94, 203 },
-                            PasswordSalt = new byte[] { 92, 3, 157, 159, 94, 141, 54, 180, 235, 180, 42, 131, 125, 200, 70, 195, 39, 71, 222, 217, 113, 182, 159, 232, 152, 11, 132, 182, 234, 226, 45, 180, 114, 71, 61, 200, 62, 4, 74, 8, 124, 134, 93, 169, 81, 95, 232, 200, 154, 94, 24, 89, 177, 203, 124, 23, 220, 76, 11, 126, 40, 174, 240, 89, 228, 241, 198, 173, 215, 118, 7, 177, 31, 196, 165, 86, 207, 238, 203, 115, 195, 40, 146, 208, 7, 43, 18, 185, 31, 166, 231, 235, 136, 49, 52, 161, 152, 185, 37, 94, 255, 99, 150, 128, 195, 79, 34, 110, 87, 93, 14, 6, 58, 102, 135, 95, 107, 245, 73, 73, 98, 218, 123, 144, 72, 195, 21, 131 },
+                            PasswordHash = new byte[] { 204, 180, 114, 58, 159, 237, 120, 9, 64, 17, 170, 146, 71, 236, 69, 74, 151, 13, 8, 135, 216, 162, 188, 148, 111, 233, 217, 23, 25, 137, 200, 187, 232, 72, 38, 31, 144, 253, 229, 46, 214, 35, 122, 128, 178, 14, 62, 150, 159, 25, 23, 52, 78, 12, 221, 182, 254, 145, 23, 192, 10, 50, 198, 4 },
+                            PasswordSalt = new byte[] { 24, 9, 169, 62, 215, 165, 58, 192, 183, 250, 63, 137, 210, 241, 254, 108, 203, 190, 226, 10, 121, 26, 138, 170, 93, 193, 147, 160, 9, 240, 252, 190, 85, 102, 175, 218, 91, 85, 188, 211, 78, 103, 111, 95, 93, 254, 136, 211, 62, 89, 62, 175, 71, 113, 102, 65, 123, 191, 100, 67, 166, 253, 15, 105, 87, 21, 51, 162, 36, 220, 187, 118, 135, 5, 240, 81, 5, 230, 40, 134, 251, 185, 206, 102, 192, 15, 141, 99, 50, 195, 243, 60, 57, 18, 245, 7, 159, 77, 214, 160, 158, 199, 224, 81, 242, 165, 42, 222, 14, 124, 11, 196, 169, 48, 4, 102, 102, 149, 140, 191, 25, 184, 72, 19, 158, 95, 87, 88 },
                             PhoneNumber = "7397388965",
                             Role = "Admin",
-                            UpdatedAt = new DateTime(2025, 2, 9, 19, 38, 59, 818, DateTimeKind.Utc).AddTicks(384)
+                            UpdatedAt = new DateTime(2025, 2, 9, 19, 17, 0, 350, DateTimeKind.Utc).AddTicks(3707)
                         });
                 });
 

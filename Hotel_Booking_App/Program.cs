@@ -1,12 +1,15 @@
 using Hotel_Booking_App.Contexts;
 using Hotel_Booking_App.Interface;
+using Hotel_Booking_App.Interface.Hotel_Room;
 using Hotel_Booking_App.Repositories;
 using Hotel_Booking_App.Service;
+using Hotel_Booking_App.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Hotel_Booking_App.Mappings;
 
 namespace Hotel_Booking_App
 {
@@ -15,6 +18,9 @@ namespace Hotel_Booking_App
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Register AutoMapper
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             // Load configuration (ensure it's properly loaded)
             var configuration = builder.Configuration;
@@ -69,6 +75,14 @@ namespace Hotel_Booking_App
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
+
+            builder.Services.AddScoped<IHotelService, HotelService>();
+            builder.Services.AddScoped<IHotelRepository, HotelRepository>();
+
+            builder.Services.AddAutoMapper(typeof(Program));
+
+
+
 
             // Authentication & JWT Setup
             var key = Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]);

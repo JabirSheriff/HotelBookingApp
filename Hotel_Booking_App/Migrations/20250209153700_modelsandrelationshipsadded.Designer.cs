@@ -4,6 +4,7 @@ using Hotel_Booking_App.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hotel_Booking_App.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    partial class HotelBookingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250209153700_modelsandrelationshipsadded")]
+    partial class modelsandrelationshipsadded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,6 +38,7 @@ namespace Hotel_Booking_App.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Amenities")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("City")
@@ -42,9 +46,11 @@ namespace Hotel_Booking_App.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContactEmail")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContactPhone")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Country")
@@ -58,14 +64,14 @@ namespace Hotel_Booking_App.Migrations
                     b.Property<int>("HotelOwnerId")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StarRating")
+                    b.Property<int>("StarRating")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -364,14 +370,14 @@ namespace Hotel_Booking_App.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 2, 9, 19, 38, 59, 818, DateTimeKind.Utc).AddTicks(384),
+                            CreatedAt = new DateTime(2025, 2, 9, 15, 36, 59, 132, DateTimeKind.Utc).AddTicks(7478),
                             Email = "admin@gmail.com",
                             FullName = "Admin",
-                            PasswordHash = new byte[] { 128, 14, 239, 10, 143, 153, 163, 143, 96, 96, 217, 69, 241, 203, 42, 27, 94, 231, 243, 17, 134, 27, 195, 184, 43, 211, 108, 86, 14, 238, 220, 253, 67, 213, 152, 152, 25, 202, 26, 101, 164, 227, 181, 139, 68, 226, 213, 130, 12, 68, 17, 153, 138, 130, 211, 6, 212, 116, 181, 133, 167, 100, 94, 203 },
-                            PasswordSalt = new byte[] { 92, 3, 157, 159, 94, 141, 54, 180, 235, 180, 42, 131, 125, 200, 70, 195, 39, 71, 222, 217, 113, 182, 159, 232, 152, 11, 132, 182, 234, 226, 45, 180, 114, 71, 61, 200, 62, 4, 74, 8, 124, 134, 93, 169, 81, 95, 232, 200, 154, 94, 24, 89, 177, 203, 124, 23, 220, 76, 11, 126, 40, 174, 240, 89, 228, 241, 198, 173, 215, 118, 7, 177, 31, 196, 165, 86, 207, 238, 203, 115, 195, 40, 146, 208, 7, 43, 18, 185, 31, 166, 231, 235, 136, 49, 52, 161, 152, 185, 37, 94, 255, 99, 150, 128, 195, 79, 34, 110, 87, 93, 14, 6, 58, 102, 135, 95, 107, 245, 73, 73, 98, 218, 123, 144, 72, 195, 21, 131 },
+                            PasswordHash = new byte[] { 91, 6, 131, 131, 67, 95, 201, 126, 154, 31, 153, 61, 59, 40, 3, 190, 141, 131, 44, 196, 250, 213, 218, 235, 226, 143, 205, 221, 247, 207, 136, 127, 230, 251, 30, 108, 202, 163, 55, 131, 105, 244, 112, 193, 206, 198, 76, 117, 146, 53, 118, 125, 54, 66, 163, 233, 190, 138, 9, 75, 54, 241, 133, 154 },
+                            PasswordSalt = new byte[] { 59, 184, 107, 3, 3, 79, 1, 91, 66, 169, 57, 227, 41, 2, 6, 250, 100, 96, 123, 239, 146, 220, 205, 148, 152, 229, 161, 184, 8, 3, 186, 76, 184, 85, 104, 225, 112, 181, 97, 63, 150, 43, 196, 167, 161, 140, 166, 181, 0, 91, 8, 125, 112, 106, 248, 125, 43, 163, 119, 204, 229, 229, 242, 35, 73, 81, 163, 221, 225, 141, 190, 52, 20, 129, 185, 241, 53, 218, 137, 252, 30, 124, 94, 23, 138, 122, 63, 164, 203, 37, 248, 118, 195, 36, 30, 119, 114, 21, 241, 115, 235, 109, 140, 199, 134, 176, 123, 231, 104, 176, 52, 121, 182, 160, 242, 249, 161, 100, 119, 163, 74, 79, 81, 183, 56, 115, 93, 155 },
                             PhoneNumber = "7397388965",
                             Role = "Admin",
-                            UpdatedAt = new DateTime(2025, 2, 9, 19, 38, 59, 818, DateTimeKind.Utc).AddTicks(384)
+                            UpdatedAt = new DateTime(2025, 2, 9, 15, 36, 59, 132, DateTimeKind.Utc).AddTicks(7478)
                         });
                 });
 

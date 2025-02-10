@@ -21,5 +21,8 @@ namespace Hotel_Booking_App.Models
 
         public string PhoneNumber { get; set; }
 
+        // ✅ Navigation Properties
+        public ICollection<Hotel> Hotels { get; set; } = new List<Hotel>();
+
     }
 }

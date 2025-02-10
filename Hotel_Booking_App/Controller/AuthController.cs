@@ -1,4 +1,5 @@
-﻿using Hotel_Booking_App.Interface;
+﻿using System.Security.Claims;
+using Hotel_Booking_App.Interface;
 using Hotel_Booking_App.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -54,5 +55,44 @@ namespace Hotel_Booking_App.Controller
                 return BadRequest(new { error = "Login failed. Please try again later." });
             }
         }
+
+        [HttpPost("register-customer")]
+        [AllowAnonymous] // ✅ Allow open registration for customers
+        public async Task<IActionResult> RegisterCustomer([FromBody] UserRegistrationDto userRegistrationDto)
+        {
+            try
+            {
+                var userResponse = await _authService.RegisterCustomerAsync(userRegistrationDto);
+                return Ok(userResponse);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Register Customer: {ex}");
+                return BadRequest(new { error = "Customer registration failed. Please try again later." });
+            }
+        }
+
+        [Authorize]
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserDto updateUserDto)
+        {
+            try
+            {
+                // Get logged-in user's ID from JWT token
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                var result = await _authService.UpdateUserProfileAsync(userId, updateUserDto);
+                if (!result) return BadRequest(new { error = "Profile update failed." });
+
+                return Ok(new { message = "Profile updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] UpdateProfile: {ex}");
+                return StatusCode(500, new { error = "An error occurred while updating profile." });
+            }
+        }
+
+
     }
 }
