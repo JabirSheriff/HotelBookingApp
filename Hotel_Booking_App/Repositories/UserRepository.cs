@@ -63,6 +63,11 @@ namespace Hotel_Booking_App.Repositories
             return await _context.HotelOwners.FirstOrDefaultAsync(h => h.UserId == userId);
         }
 
+        public async Task<Customer> GetCustomerByUserIdAsync(int userId)
+        {
+            return await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId);
+        }
+
 
         public async Task<bool> SaveChangesAsync()
         {

@@ -87,6 +87,14 @@ namespace Hotel_Booking_App.Service
                 hotelOwnerId = hotelOwner?.Id;  // Get HotelOwner ID
             }
 
+            // ✅ Fetch Customer ID
+            int? CustomerId = null;
+            if (user.Role == "Customer")
+            {
+                var Customer = await _userRepository.GetCustomerByUserIdAsync(user.Id);
+                hotelOwnerId = Customer?.Id;  // Get HotelOwner ID
+            }
+
             // 🔥 Ensure JWT Secret Key is loaded properly
             var secretKey = _configuration["Jwt:Secret"];
             if (string.IsNullOrEmpty(secretKey))
@@ -104,7 +112,8 @@ namespace Hotel_Booking_App.Service
 
             if (hotelOwnerId.HasValue)
                 claims.Add(new Claim("hotelOwnerId", hotelOwnerId.Value.ToString()));
-
+            if(CustomerId.HasValue)
+                claims.Add(new Claim("CustomerId", CustomerId.Value.ToString()));
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {

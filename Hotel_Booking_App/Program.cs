@@ -11,6 +11,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Hotel_Booking_App.Mappings;
 using Hotel_Booking_App.Interface.Bookings;
+using Hotel_Booking_App.Interface.Payment;
+using Hotel_Booking_App.Interface.Review;
 
 
 namespace Hotel_Booking_App
@@ -90,6 +92,11 @@ namespace Hotel_Booking_App
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
+            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
 
 
             //builder.Services.AddAutoMapper(typeof(Program));

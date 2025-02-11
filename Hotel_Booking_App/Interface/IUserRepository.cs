@@ -14,6 +14,7 @@ namespace Hotel_Booking_App.Interface
         Task DeleteUserAsync(int id);
         Task<bool> SaveChangesAsync();
         Task<HotelOwner> GetHotelOwnerByUserIdAsync(int userId);
+        Task<Customer> GetCustomerByUserIdAsync(int userId);
 
     }
 }

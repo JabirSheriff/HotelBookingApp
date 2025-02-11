@@ -8,5 +8,6 @@
         public string Message { get; set; }
         public string Token { get; set; }
         public int? HotelOwnerId { get; set; }
+        public int? CustomerId { get; set; }
     }
 }
