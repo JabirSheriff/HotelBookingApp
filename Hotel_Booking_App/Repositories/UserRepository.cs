@@ -69,6 +69,17 @@ namespace Hotel_Booking_App.Repositories
         }
 
 
+        public async Task<User?> GetLastUserAsync()
+        {
+            return await _context.Users.OrderByDescending(u => u.Id).FirstOrDefaultAsync();
+        }
+
+        public async Task<Customer?> GetLastCustomerAsync()
+        {
+            return await _context.Customers.OrderByDescending(c => c.Id).FirstOrDefaultAsync();
+        }
+
+
         public async Task<bool> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync() > 0;

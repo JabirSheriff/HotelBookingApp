@@ -2,6 +2,7 @@
 using Hotel_Booking_App.Interface.Hotel_Room;
 using Hotel_Booking_App.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Hotel_Booking_App.Repositories
 {
@@ -28,6 +29,8 @@ namespace Hotel_Booking_App.Repositories
                 .ToListAsync();
         }
 
+       
+
         public async Task<Hotel?> GetHotelByIdAsync(int hotelId)
         {
             return await _context.Hotels
@@ -45,8 +48,10 @@ namespace Hotel_Booking_App.Repositories
         {
             var hotel = await GetHotelByIdAsync(hotelId);
             if (hotel != null)
+            {
                 _context.Hotels.Remove(hotel);
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<List<Hotel>> GetHotelsWithRoomsAsync(string city, string country, decimal? maxPrice)
@@ -63,7 +68,6 @@ namespace Hotel_Booking_App.Repositories
 
             return await query.ToListAsync();
         }
-
 
         public async Task<bool> SaveChangesAsync()
         {

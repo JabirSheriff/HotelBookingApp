@@ -1,8 +1,10 @@
-﻿using Hotel_Booking_App.Interface.Hotel_Room;
+﻿using Azure;
+using Hotel_Booking_App.Interface.Hotel_Room;
 using Hotel_Booking_App.Models.DTOs.Hotel_Room;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Hotel_Booking_App.Controllers
 {
@@ -21,15 +23,24 @@ namespace Hotel_Booking_App.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddHotel([FromBody] AddHotelDto dto)
         {
-            var ownerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var ownerIdClaim = User.FindFirst("HotelOwnerId")?.Value;
+            if (ownerIdClaim == null)
+                return Unauthorized("Invalid token or missing HotelOwnerId.");
+
+            int ownerId = int.Parse(ownerIdClaim);
+
             var hotel = await _hotelService.AddHotelAsync(ownerId, dto);
-            return Ok(hotel);
+            return CreatedAtAction(nameof(GetHotelById), new { hotelId = hotel.Id }, hotel);
         }
 
-        [HttpGet]
+        [HttpGet("by-owner")]
         public async Task<IActionResult> GetHotelsByOwner()
         {
-            var ownerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var ownerIdClaim = User.FindFirst("HotelOwnerId")?.Value;
+            if (ownerIdClaim == null)
+                return Unauthorized("Invalid token or missing HotelOwnerId.");
+
+            int ownerId = int.Parse(ownerIdClaim);
             var hotels = await _hotelService.GetHotelsByOwnerIdAsync(ownerId);
             return Ok(hotels);
         }
@@ -38,38 +49,56 @@ namespace Hotel_Booking_App.Controllers
         public async Task<IActionResult> GetHotelById(int hotelId)
         {
             var hotel = await _hotelService.GetHotelByIdAsync(hotelId);
-            if (hotel == null) return NotFound("Hotel not found.");
+            if (hotel == null)
+                return NotFound("Hotel not found.");
             return Ok(hotel);
         }
 
-        [HttpPut("{hotelId}")]
-        public async Task<IActionResult> UpdateHotel(int hotelId, [FromBody] AddHotelDto dto)
+        [HttpPatch("{hotelId}")]
+        public async Task<IActionResult> UpdateHotel(int hotelId, [FromBody] JsonPatchDocument<AddHotelDto> patchDto)
         {
-            var success = await _hotelService.UpdateHotelAsync(hotelId, dto);
-            if (!success) return NotFound("Hotel not found.");
-            return Ok("Hotel updated successfully.");
+            var hotel = await _hotelService.GetHotelEntityByIdAsync(hotelId);
+            if (hotel == null) return NotFound("Hotel not found.");
+
+            var hotelDto = new AddHotelDto
+            {
+                Name = hotel.Name,
+                Address = hotel.Address,
+                City = hotel.City,
+                Country = hotel.Country,
+                StarRating = hotel.StarRating,
+                ContactEmail = hotel.ContactEmail,
+                ContactPhone = hotel.ContactPhone,
+                IsActive = hotel.IsActive
+            };
+
+            patchDto.ApplyTo(hotelDto, ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var success = await _hotelService.UpdateHotelAsync(hotelId, hotelDto);
+            return success ? Ok("Hotel updated successfully.") : NotFound("Hotel not found.");
         }
+
+
+
 
         [HttpDelete("{hotelId}")]
         public async Task<IActionResult> DeleteHotel(int hotelId)
         {
+            var ownerIdClaim = User.FindFirst("HotelOwnerId")?.Value;
+            if (ownerIdClaim == null)
+                return Unauthorized("Invalid token or missing HotelOwnerId.");
+
+            int ownerId = int.Parse(ownerIdClaim);
+
+            var hotel = await _hotelService.GetHotelByIdAsync(hotelId);
+            if (hotel == null || hotel.HotelOwnerId != ownerId)
+                return Forbid("Unauthorized to delete this hotel.");
+
             var success = await _hotelService.DeleteHotelAsync(hotelId);
             if (!success) return NotFound("Hotel not found.");
             return Ok("Hotel deleted successfully.");
-        }
-
-        [HttpGet("search")]
-        [AllowAnonymous]
-        public async Task<IActionResult> SearchHotelsWithRooms([FromQuery] RoomSearchRequestDto request)
-        {
-            var hotels = await _hotelService.SearchHotelsWithRoomsAsync(request);
-
-            if (hotels == null || !hotels.Any())
-            {
-                return NotFound("No hotels found matching the search criteria.");
-            }
-
-            return Ok(hotels);
         }
     }
 }

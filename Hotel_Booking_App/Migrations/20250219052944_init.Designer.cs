@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hotel_Booking_App.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    [Migration("20250209193901_changes")]
-    partial class changes
+    [Migration("20250219052944_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -179,7 +179,6 @@ namespace Hotel_Booking_App.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SpecialRequest")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
@@ -203,6 +202,9 @@ namespace Hotel_Booking_App.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BookingId2")
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
@@ -367,14 +369,14 @@ namespace Hotel_Booking_App.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 2, 9, 19, 38, 59, 818, DateTimeKind.Utc).AddTicks(384),
+                            CreatedAt = new DateTime(2025, 2, 19, 5, 29, 42, 334, DateTimeKind.Utc).AddTicks(3857),
                             Email = "admin@gmail.com",
                             FullName = "Admin",
-                            PasswordHash = new byte[] { 128, 14, 239, 10, 143, 153, 163, 143, 96, 96, 217, 69, 241, 203, 42, 27, 94, 231, 243, 17, 134, 27, 195, 184, 43, 211, 108, 86, 14, 238, 220, 253, 67, 213, 152, 152, 25, 202, 26, 101, 164, 227, 181, 139, 68, 226, 213, 130, 12, 68, 17, 153, 138, 130, 211, 6, 212, 116, 181, 133, 167, 100, 94, 203 },
-                            PasswordSalt = new byte[] { 92, 3, 157, 159, 94, 141, 54, 180, 235, 180, 42, 131, 125, 200, 70, 195, 39, 71, 222, 217, 113, 182, 159, 232, 152, 11, 132, 182, 234, 226, 45, 180, 114, 71, 61, 200, 62, 4, 74, 8, 124, 134, 93, 169, 81, 95, 232, 200, 154, 94, 24, 89, 177, 203, 124, 23, 220, 76, 11, 126, 40, 174, 240, 89, 228, 241, 198, 173, 215, 118, 7, 177, 31, 196, 165, 86, 207, 238, 203, 115, 195, 40, 146, 208, 7, 43, 18, 185, 31, 166, 231, 235, 136, 49, 52, 161, 152, 185, 37, 94, 255, 99, 150, 128, 195, 79, 34, 110, 87, 93, 14, 6, 58, 102, 135, 95, 107, 245, 73, 73, 98, 218, 123, 144, 72, 195, 21, 131 },
+                            PasswordHash = new byte[] { 30, 167, 168, 61, 156, 199, 110, 216, 228, 76, 15, 42, 253, 168, 190, 50, 35, 232, 190, 41, 172, 210, 150, 212, 19, 243, 118, 18, 17, 230, 239, 82, 212, 209, 23, 116, 106, 9, 135, 253, 132, 167, 82, 89, 50, 250, 137, 28, 45, 171, 211, 120, 230, 222, 236, 124, 165, 195, 16, 199, 207, 132, 228, 13 },
+                            PasswordSalt = new byte[] { 79, 18, 105, 32, 207, 225, 12, 18, 162, 222, 244, 46, 16, 210, 200, 248, 145, 147, 33, 76, 242, 198, 143, 58, 255, 179, 196, 154, 44, 61, 245, 105, 31, 29, 74, 18, 168, 20, 103, 51, 83, 87, 194, 228, 16, 158, 183, 123, 194, 47, 87, 166, 136, 189, 10, 103, 161, 148, 43, 73, 214, 208, 43, 141, 128, 80, 167, 173, 197, 20, 152, 180, 0, 73, 21, 59, 181, 110, 78, 98, 51, 197, 219, 54, 97, 22, 50, 115, 212, 208, 103, 249, 158, 31, 242, 62, 181, 120, 253, 98, 65, 49, 119, 64, 192, 194, 134, 52, 113, 25, 162, 232, 216, 80, 124, 7, 136, 202, 164, 77, 123, 56, 111, 5, 236, 80, 83, 194 },
                             PhoneNumber = "7397388965",
                             Role = "Admin",
-                            UpdatedAt = new DateTime(2025, 2, 9, 19, 38, 59, 818, DateTimeKind.Utc).AddTicks(384)
+                            UpdatedAt = new DateTime(2025, 2, 19, 5, 29, 42, 334, DateTimeKind.Utc).AddTicks(3857)
                         });
                 });
 
@@ -432,7 +434,7 @@ namespace Hotel_Booking_App.Migrations
                     b.HasOne("Hotel_Booking_App.Models.Customer", "Customer")
                         .WithMany("Bookings")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Hotel", "Hotel")

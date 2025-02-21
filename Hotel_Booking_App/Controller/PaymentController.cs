@@ -19,7 +19,7 @@ namespace Hotel_Booking_App.Controllers
             _paymentService = paymentService;
         }
 
-        [HttpPost("process")]
+        [HttpPost("process Payment")]
         public async Task<IActionResult> ProcessPayment([FromBody] PaymentRequestDto paymentRequest)
         {
             var paymentResponse = await _paymentService.ProcessPaymentAsync(paymentRequest);

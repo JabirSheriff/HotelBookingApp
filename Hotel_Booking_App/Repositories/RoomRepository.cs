@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Hotel_Booking_App.Contexts;
 using Hotel_Booking_App.Interface.Hotel_Room;
 using Hotel_Booking_App.Models;
@@ -18,29 +20,38 @@ namespace Hotel_Booking_App.Repositories
         public async Task AddRoomAsync(Room room)
         {
             await _context.Rooms.AddAsync(room);
-            await _context.SaveChangesAsync();
+            var saved = await _context.SaveChangesAsync();
+
+            if (saved <= 0)
+            {
+                throw new Exception("Failed to save room.");
+            }
         }
 
         public async Task<Room?> GetRoomByIdAsync(int roomId)
         {
-            return await _context.Rooms.Include(r => r.Hotel).FirstOrDefaultAsync(r => r.Id == roomId);
+            return await _context.Rooms
+                .Include(r => r.Hotel)
+                .FirstOrDefaultAsync(r => r.Id == roomId);
         }
 
         public async Task<IEnumerable<Room>> GetRoomsByHotelIdAsync(int hotelId)
         {
-            return await _context.Rooms.Where(r => r.HotelId == hotelId).ToListAsync();
+            return await _context.Rooms
+                .Where(r => r.HotelId == hotelId)
+                .ToListAsync();
         }
 
         public async Task<bool> UpdateRoomAsync(Room room)
         {
             _context.Rooms.Update(room);
-            return await SaveChangesAsync();
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> DeleteRoomAsync(Room room)
         {
             _context.Rooms.Remove(room);
-            return await SaveChangesAsync();
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> SaveChangesAsync()

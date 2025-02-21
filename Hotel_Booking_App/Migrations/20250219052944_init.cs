@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Hotel_Booking_App.Migrations
 {
     /// <inheritdoc />
-    public partial class modelsandrelationshipsadded : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -85,7 +85,7 @@ namespace Hotel_Booking_App.Migrations
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StarRating = table.Column<int>(type: "int", nullable: false),
+                    StarRating = table.Column<int>(type: "int", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     HotelOwnerId = table.Column<int>(type: "int", nullable: false),
                     ContactEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -110,14 +110,14 @@ namespace Hotel_Booking_App.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerId = table.Column<int>(type: "int", nullable: true),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
                     HotelId = table.Column<int>(type: "int", nullable: false),
                     CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NumberOfGuests = table.Column<int>(type: "int", nullable: false),
                     TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    SpecialRequest = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    SpecialRequest = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -127,7 +127,7 @@ namespace Hotel_Booking_App.Migrations
                         column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Bookings_Hotels_HotelId",
                         column: x => x.HotelId,
@@ -227,7 +227,8 @@ namespace Hotel_Booking_App.Migrations
                 {
                     BookingId = table.Column<int>(type: "int", nullable: false),
                     RoomId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    BookingId2 = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -249,7 +250,7 @@ namespace Hotel_Booking_App.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreatedAt", "Email", "FullName", "PasswordHash", "PasswordSalt", "PhoneNumber", "Role", "UpdatedAt" },
-                values: new object[] { 1, new DateTime(2025, 2, 9, 15, 36, 59, 132, DateTimeKind.Utc).AddTicks(7478), "admin@gmail.com", "Admin", new byte[] { 91, 6, 131, 131, 67, 95, 201, 126, 154, 31, 153, 61, 59, 40, 3, 190, 141, 131, 44, 196, 250, 213, 218, 235, 226, 143, 205, 221, 247, 207, 136, 127, 230, 251, 30, 108, 202, 163, 55, 131, 105, 244, 112, 193, 206, 198, 76, 117, 146, 53, 118, 125, 54, 66, 163, 233, 190, 138, 9, 75, 54, 241, 133, 154 }, new byte[] { 59, 184, 107, 3, 3, 79, 1, 91, 66, 169, 57, 227, 41, 2, 6, 250, 100, 96, 123, 239, 146, 220, 205, 148, 152, 229, 161, 184, 8, 3, 186, 76, 184, 85, 104, 225, 112, 181, 97, 63, 150, 43, 196, 167, 161, 140, 166, 181, 0, 91, 8, 125, 112, 106, 248, 125, 43, 163, 119, 204, 229, 229, 242, 35, 73, 81, 163, 221, 225, 141, 190, 52, 20, 129, 185, 241, 53, 218, 137, 252, 30, 124, 94, 23, 138, 122, 63, 164, 203, 37, 248, 118, 195, 36, 30, 119, 114, 21, 241, 115, 235, 109, 140, 199, 134, 176, 123, 231, 104, 176, 52, 121, 182, 160, 242, 249, 161, 100, 119, 163, 74, 79, 81, 183, 56, 115, 93, 155 }, "7397388965", "Admin", new DateTime(2025, 2, 9, 15, 36, 59, 132, DateTimeKind.Utc).AddTicks(7478) });
+                values: new object[] { 1, new DateTime(2025, 2, 19, 5, 29, 42, 334, DateTimeKind.Utc).AddTicks(3857), "admin@gmail.com", "Admin", new byte[] { 30, 167, 168, 61, 156, 199, 110, 216, 228, 76, 15, 42, 253, 168, 190, 50, 35, 232, 190, 41, 172, 210, 150, 212, 19, 243, 118, 18, 17, 230, 239, 82, 212, 209, 23, 116, 106, 9, 135, 253, 132, 167, 82, 89, 50, 250, 137, 28, 45, 171, 211, 120, 230, 222, 236, 124, 165, 195, 16, 199, 207, 132, 228, 13 }, new byte[] { 79, 18, 105, 32, 207, 225, 12, 18, 162, 222, 244, 46, 16, 210, 200, 248, 145, 147, 33, 76, 242, 198, 143, 58, 255, 179, 196, 154, 44, 61, 245, 105, 31, 29, 74, 18, 168, 20, 103, 51, 83, 87, 194, 228, 16, 158, 183, 123, 194, 47, 87, 166, 136, 189, 10, 103, 161, 148, 43, 73, 214, 208, 43, 141, 128, 80, 167, 173, 197, 20, 152, 180, 0, 73, 21, 59, 181, 110, 78, 98, 51, 197, 219, 54, 97, 22, 50, 115, 212, 208, 103, 249, 158, 31, 242, 62, 181, 120, 253, 98, 65, 49, 119, 64, 192, 194, 134, 52, 113, 25, 162, 232, 216, 80, 124, 7, 136, 202, 164, 77, 123, 56, 111, 5, 236, 80, 83, 194 }, "7397388965", "Admin", new DateTime(2025, 2, 19, 5, 29, 42, 334, DateTimeKind.Utc).AddTicks(3857) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_BookingRooms_RoomId",

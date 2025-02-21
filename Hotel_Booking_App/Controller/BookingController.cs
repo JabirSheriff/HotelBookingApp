@@ -19,7 +19,7 @@ namespace Hotel_Booking_App.Controller
         }
 
         [Authorize(Roles = "Customer")]
-        [HttpPost("create")]
+        [HttpPost("Add Booking")]
         public async Task<IActionResult> CreateBooking([FromBody] BookingRequestDto requestDto)
         {
             if (!ModelState.IsValid)
@@ -32,16 +32,16 @@ namespace Hotel_Booking_App.Controller
             return Ok(bookingResponse);
         }
 
-        // ✅ Get All Bookings by Customer (Only if Payment is Made)
-        [HttpGet("customer/{customerId}")]
-        public async Task<IActionResult> GetAllBookingsByCustomer(int customerId)
-        {
-            var bookings = await _bookingService.GetAllBookingsByCustomerAsync(customerId);
-            return Ok(bookings);
-        }
+        //// ✅ Get All Bookings by Customer (Only if Payment is Made)
+        //[HttpGet("customer/{Bookings}")]
+        //public async Task<IActionResult> GetAllBookingsByCustomer(int customerId)
+        //{
+        //    var bookings = await _bookingService.GetAllBookingsByCustomerAsync(customerId);
+        //    return Ok(bookings);
+        //}
 
         // ✅ Get Booking by ID (Only if Payment is Made)
-        [HttpGet("{bookingId}")]
+        [HttpGet("{Booking By Id }")]
         public async Task<IActionResult> GetBookingById(int bookingId)
         {
             var booking = await _bookingService.GetBookingByIdAsync(bookingId);
@@ -50,7 +50,7 @@ namespace Hotel_Booking_App.Controller
         }
 
         // ✅ Update Booking (Allowed Anytime)
-        [HttpPut("{bookingId}")]
+        [HttpPut("{Update Booking}")]
         public async Task<IActionResult> UpdateBooking(int bookingId, [FromBody] UpdateBookingRequestDto updateDto)
         {
             var success = await _bookingService.UpdateBookingAsync(bookingId, updateDto);
@@ -59,7 +59,7 @@ namespace Hotel_Booking_App.Controller
         }
 
         // ✅ Delete Booking (Allowed Anytime)
-        [HttpDelete("{bookingId}")]
+        [HttpDelete("{Delete Booking}")]
         public async Task<IActionResult> DeleteBooking(int bookingId)
         {
             var success = await _bookingService.DeleteBookingAsync(bookingId);

@@ -17,11 +17,15 @@ namespace Hotel_Booking_App.Mappings
             CreateMap<Hotel, HotelResponseDto>();
 
             // ✅ Room Mapping  
-            CreateMap<RoomRequestDto, Room>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id (auto-generated)  
-                .ForMember(dest => dest.Hotel, opt => opt.Ignore()); // Hotel entity should not be mapped directly  
+            //CreateMap<RoomRequestDto, Room>()
+            //    .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id (auto-generated)  
+            //    .ForMember(dest => dest.Hotel, opt => opt.Ignore()); // Hotel entity should not be mapped directly  
 
+            //CreateMap<Room, RoomResponseDto>();
+
+            CreateMap<Room, RoomRequestDto>().ReverseMap();
             CreateMap<Room, RoomResponseDto>();
+
 
             // ✅ Booking Mapping  
             CreateMap<BookingRequestDto, Booking>()

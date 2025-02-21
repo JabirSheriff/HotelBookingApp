@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Hotel_Booking_App.Service
 {
-    public class AuthService :IAuthService
+    public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
@@ -53,6 +53,99 @@ namespace Hotel_Booking_App.Service
             };
         }
 
+        //public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
+        //{
+        //    var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
+        //    if (user == null)
+        //        throw new Exception("User not found.");
+
+        //    using var hmac = new HMACSHA512(user.PasswordSalt);
+        //    var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+
+        //    if (!computedHash.SequenceEqual(user.PasswordHash))
+        //        throw new Exception("Invalid password.");
+
+        //    // Check if the user's role is assigned
+        //    if (user.Role == "Unassigned")
+        //    {
+        //        return new LoginResponseDto
+        //        {
+
+        //            Message = "Login successful, but role is not assigned. Please contact Admin.",
+        //            Token = null,
+        //            FullName = user.FullName,
+        //            Email = user.Email,
+        //            Role = user.Role
+        //        };
+        //    }
+
+        //    // ✅ Fetch HotelOwner ID
+        //    int? hotelOwnerId = null;
+        //    if (user.Role == "HotelOwner")
+        //    {
+        //        var hotelOwner = await _userRepository.GetHotelOwnerByUserIdAsync(user.Id);
+        //        hotelOwnerId = hotelOwner?.Id;  // Get HotelOwner ID
+        //    }
+
+        //    // ✅ Fetch Customer ID
+        //    int? CustomerId = null;
+        //    if (user.Role == "Customer")
+        //    {
+        //        var Customer = await _userRepository.GetCustomerByUserIdAsync(user.Id);
+        //        CustomerId = Customer?.Id;  
+        //    }
+
+        //    // 🔥 Ensure JWT Secret Key is loaded properly
+        //    var secretKey = _configuration["Jwt:Secret"];
+        //    if (string.IsNullOrEmpty(secretKey))
+        //        throw new Exception("JWT Secret Key is missing in configuration.");
+
+        //    var key = Encoding.UTF8.GetBytes(secretKey);
+
+        //    // ✅ Add Role, Email, and ID claims properly
+        //    var claims = new List<Claim>
+        //    {
+        //        new Claim("nameId", user.Id.ToString()),
+        //        new Claim(ClaimTypes.Email, user.Email),
+        //        new Claim(ClaimTypes.Role, user.Role)
+        //    };
+
+        //    if (hotelOwnerId.HasValue)
+        //        claims.Add(new Claim("hotelOwnerId", hotelOwnerId.Value.ToString()));
+        //    if(CustomerId.HasValue)
+        //        claims.Add(new Claim("CustomerId", CustomerId.Value.ToString()));
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+        //    var tokenDescriptor = new SecurityTokenDescriptor
+        //    {
+        //        Subject = new ClaimsIdentity(claims),
+        //        Expires = DateTime.UtcNow.AddDays(7),
+        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        //    };
+
+        //    var token = tokenHandler.CreateToken(tokenDescriptor);
+        //    string jwtToken = tokenHandler.WriteToken(token);
+
+        //    // ✅ Ensure Role-Based Messages in Response
+        //    string welcomeMessage = user.Role switch
+        //    {
+        //        "Admin" => "Welcome to Admin Dashboard",
+        //        "Customer" => "Welcome to Hotel Booking App",
+        //        "HotelOwner" => "Welcome to Hotel Booking Dashboard",
+        //        _ => "Unauthorized access"
+        //    };
+
+        //    return new LoginResponseDto
+        //    {
+        //        FullName = user.FullName,  // ✅ Send Full Name
+        //        Email = user.Email,  // ✅ Send Email
+        //        Role = user.Role,
+        //        //HotelOwnerId = hotelOwnerId,
+        //        //CustomerId = CustomerId,
+        //        Message = welcomeMessage,
+        //        Token = jwtToken
+        //    };
+        //}
+
         public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
         {
             var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
@@ -70,7 +163,6 @@ namespace Hotel_Booking_App.Service
             {
                 return new LoginResponseDto
                 {
-
                     Message = "Login successful, but role is not assigned. Please contact Admin.",
                     Token = null,
                     FullName = user.FullName,
@@ -84,15 +176,15 @@ namespace Hotel_Booking_App.Service
             if (user.Role == "HotelOwner")
             {
                 var hotelOwner = await _userRepository.GetHotelOwnerByUserIdAsync(user.Id);
-                hotelOwnerId = hotelOwner?.Id;  // Get HotelOwner ID
+                hotelOwnerId = hotelOwner?.Id;
             }
 
             // ✅ Fetch Customer ID
-            int? CustomerId = null;
+            int? customerId = null;
             if (user.Role == "Customer")
             {
-                var Customer = await _userRepository.GetCustomerByUserIdAsync(user.Id);
-                hotelOwnerId = Customer?.Id;  // Get HotelOwner ID
+                var customer = await _userRepository.GetCustomerByUserIdAsync(user.Id);
+                customerId = customer?.Id;
             }
 
             // 🔥 Ensure JWT Secret Key is loaded properly
@@ -102,18 +194,19 @@ namespace Hotel_Booking_App.Service
 
             var key = Encoding.UTF8.GetBytes(secretKey);
 
-            // ✅ Add Role, Email, and ID claims properly
+            // ✅ Fix: Use ClaimTypes.NameIdentifier instead of "nameId"
             var claims = new List<Claim>
-            {
-                new Claim("nameId", user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role)
+    };
 
             if (hotelOwnerId.HasValue)
                 claims.Add(new Claim("hotelOwnerId", hotelOwnerId.Value.ToString()));
-            if(CustomerId.HasValue)
-                claims.Add(new Claim("CustomerId", CustomerId.Value.ToString()));
+            if (customerId.HasValue)
+                claims.Add(new Claim("customerId", customerId.Value.ToString()));
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -136,14 +229,16 @@ namespace Hotel_Booking_App.Service
 
             return new LoginResponseDto
             {
-                FullName = user.FullName,  // ✅ Send Full Name
-                Email = user.Email,  // ✅ Send Email
+                FullName = user.FullName,
+                Email = user.Email,
                 Role = user.Role,
-                HotelOwnerId = hotelOwnerId,
+                HotelOwnerId = hotelOwnerId,  // ✅ Now included
+                CustomerId = customerId,  // ✅ Now included
                 Message = welcomeMessage,
                 Token = jwtToken
             };
         }
+
 
         public async Task<UserRegistrationResponseDto> RegisterCustomerAsync(UserRegistrationDto userRegistrationDto)
         {
@@ -189,31 +284,61 @@ namespace Hotel_Booking_App.Service
             };
         }
 
+        
         public async Task<bool> UpdateUserProfileAsync(int userId, UpdateUserDto updateUserDto)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null) return false;
 
-            // Update only non-null values
-            if (!string.IsNullOrEmpty(updateUserDto.FullName))
+            // ✅ Ignore fields if they are "string" (default value)
+            if (!string.IsNullOrWhiteSpace(updateUserDto.FullName) && updateUserDto.FullName != "string" &&updateUserDto.FullName != "")
                 user.FullName = updateUserDto.FullName;
 
-            if (!string.IsNullOrEmpty(updateUserDto.Email))
-                user.Email = updateUserDto.Email;
-
-            if (!string.IsNullOrEmpty(updateUserDto.PhoneNumber))
+            if (!string.IsNullOrWhiteSpace(updateUserDto.PhoneNumber) && updateUserDto.PhoneNumber != "string" && updateUserDto.FullName != "")
                 user.PhoneNumber = updateUserDto.PhoneNumber;
 
-            if (!string.IsNullOrEmpty(updateUserDto.Password))
+            if (!string.IsNullOrWhiteSpace(updateUserDto.Password) && updateUserDto.Password != "string" && updateUserDto.FullName != "")
             {
                 using var hmac = new HMACSHA512();
                 user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(updateUserDto.Password));
                 user.PasswordSalt = hmac.Key;
             }
 
+            // ✅ Update Customer table (if the user is a customer)
+            if (user.Role == "Customer")
+            {
+                var customer = await _userRepository.GetCustomerByUserIdAsync(userId);
+                if (customer != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(updateUserDto.FullName) && updateUserDto.FullName != "string")
+                        customer.FullName = user.FullName;
+
+                    if (!string.IsNullOrWhiteSpace(updateUserDto.PhoneNumber) && updateUserDto.PhoneNumber != "string")
+                        customer.PhoneNumber = user.PhoneNumber;
+                }
+            }
+
+            // ✅ Update HotelOwner table (if the user is a hotel owner)
+            if (user.Role == "HotelOwner")
+            {
+                var hotelOwner = await _userRepository.GetHotelOwnerByUserIdAsync(userId);
+                if (hotelOwner != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(updateUserDto.FullName) && updateUserDto.FullName != "string")
+                        hotelOwner.FullName = user.FullName;
+
+                    if (!string.IsNullOrWhiteSpace(updateUserDto.PhoneNumber) && updateUserDto.PhoneNumber != "string")
+                        hotelOwner.PhoneNumber = user.PhoneNumber;
+                }
+            }
+
             await _userRepository.SaveChangesAsync();
             return true;
         }
+
+
+
+
 
 
     }

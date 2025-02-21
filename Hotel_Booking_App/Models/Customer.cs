@@ -7,12 +7,13 @@ namespace Hotel_Booking_App.Models
     public class Customer
     {
         [Key]
+        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
         [Required]
         [ForeignKey("User")]
         public int UserId { get; set; }
-        public User User { get; set; } // Navigation property
+        public virtual User User { get; set; } // Navigation property
 
         [Required]
         public string FullName { get; set; }

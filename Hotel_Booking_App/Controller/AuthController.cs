@@ -20,7 +20,7 @@ namespace Hotel_Booking_App.Controller
             _userRepository = userRepository;
         }
 
-        [HttpPost("register")]
+        [HttpPost("register User")]
         [AllowAnonymous] // ✅ Explicitly allow registration for all users
         public async Task<IActionResult> Register([FromBody] UserRegistrationDto userregistrationDto)
         {
@@ -72,14 +72,48 @@ namespace Hotel_Booking_App.Controller
             }
         }
 
+        //[Authorize]
+        //[HttpPut("update-profile")]
+        //public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserDto updateUserDto)
+        //{
+        //    try
+        //    {
+        //        // Get logged-in user's ID from JWT token
+        //        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+        //        var result = await _authService.UpdateUserProfileAsync(userId, updateUserDto);
+        //        if (!result) return BadRequest(new { error = "Profile update failed." });
+
+        //        return Ok(new { message = "Profile updated successfully." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"[ERROR] UpdateProfile: {ex}");
+        //        return StatusCode(500, new { error = "An error occurred while updating profile." });
+        //    }
+        //}
+
+
         [Authorize]
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserDto updateUserDto)
         {
             try
             {
-                // Get logged-in user's ID from JWT token
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                // Debug: Print all claims to check if nameId exists
+                foreach (var claim in User.Claims)
+                {
+                    Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                }
+
+                // Fix: Use "nameId" if ClaimTypes.NameIdentifier is missing
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                                  User.FindFirst("nameId")?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { error = "User ID claim is missing in token." });
+
+                var userId = int.Parse(userIdClaim);
 
                 var result = await _authService.UpdateUserProfileAsync(userId, updateUserDto);
                 if (!result) return BadRequest(new { error = "Profile update failed." });

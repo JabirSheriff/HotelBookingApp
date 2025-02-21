@@ -18,7 +18,7 @@ namespace Hotel_Booking_App.Controller
             _roleService = roleService;
         }
         [Authorize(Roles = "Admin")]
-        [HttpPut("update")]
+        [HttpPut("update Role")]
         public async Task<IActionResult> UpdateUserRole([FromBody] UpdateUserRoleDto dto)
         {
             var success = await _roleService.UpdateUserRoleAsync(dto);
