@@ -20,6 +20,14 @@ namespace Hotel_Booking_App.Controllers
             _hotelService = hotelService;
         }
 
+        [HttpGet("all")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllHotels()
+        {
+            var hotels = await _hotelService.GetAllHotelsAsync();
+            return Ok(hotels);
+        }
+
         [HttpPost("add")]
         public async Task<IActionResult> AddHotel([FromBody] AddHotelDto dto)
         {

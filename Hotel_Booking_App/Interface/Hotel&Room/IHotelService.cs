@@ -4,6 +4,7 @@ namespace Hotel_Booking_App.Interface.Hotel_Room
 {
     public interface IHotelService
     {
+        Task<IEnumerable<HotelResponseDto>> GetAllHotelsAsync();
         Task<HotelResponseDto> AddHotelAsync(int ownerId, AddHotelDto dto);
         Task<IEnumerable<HotelResponseDto>> GetHotelsByOwnerIdAsync(int ownerId);
         Task<Hotel?> GetHotelEntityByIdAsync(int hotelId);

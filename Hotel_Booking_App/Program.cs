@@ -13,6 +13,7 @@ using Hotel_Booking_App.Mappings;
 using Hotel_Booking_App.Interface.Bookings;
 using Hotel_Booking_App.Interface.Payment;
 using Hotel_Booking_App.Interface.Review;
+using Hotel_Booking_App.Interface.Customer;
 
 
 namespace Hotel_Booking_App
@@ -94,6 +95,12 @@ namespace Hotel_Booking_App
 
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+            builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+            builder.Services.AddHostedService<BookingCleanupService>();
+
+
 
             //builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             //builder.Services.AddScoped<IReviewService, ReviewService>();

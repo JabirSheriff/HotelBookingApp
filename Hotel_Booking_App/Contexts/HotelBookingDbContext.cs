@@ -102,7 +102,7 @@ namespace Hotel_Booking_App.Contexts
                 .HasOne(br => br.Booking)
                 .WithMany(b => b.BookingRooms)
                 .HasForeignKey(br => br.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<BookingRoom>()
                 .HasOne(br => br.Room)

@@ -12,40 +12,34 @@ namespace Hotel_Booking_App.Mappings
         {
             // ✅ Hotel Mapping  
             CreateMap<AddHotelDto, Hotel>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()); // Ignore Id as it's auto-generated  
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<Hotel, HotelResponseDto>();
 
             // ✅ Room Mapping  
-            //CreateMap<RoomRequestDto, Room>()
-            //    .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id (auto-generated)  
-            //    .ForMember(dest => dest.Hotel, opt => opt.Ignore()); // Hotel entity should not be mapped directly  
-
-            //CreateMap<Room, RoomResponseDto>();
-
             CreateMap<Room, RoomRequestDto>().ReverseMap();
             CreateMap<Room, RoomResponseDto>();
 
-
             // ✅ Booking Mapping  
             CreateMap<BookingRequestDto, Booking>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id (auto-generated)  
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => BookingStatus.Pending)) // Default status  
-                .ForMember(dest => dest.BookingRooms, opt => opt.Ignore()) // BookingRooms handled separately  
-                .ForMember(dest => dest.Customer, opt => opt.Ignore()) // Customer set separately  
-                .ForMember(dest => dest.Hotel, opt => opt.Ignore()) // Hotel entity should not be mapped directly  
-                .ForMember(dest => dest.SpecialRequest, opt => opt.MapFrom(src => src.SpecialRequest ?? "")); // ✅ Prevent NULL
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => BookingStatus.Pending))
+                .ForMember(dest => dest.SpecialRequest, opt => opt.MapFrom(src => src.SpecialRequest ?? ""))
+                .ForMember(dest => dest.BookingRooms, opt => opt.Ignore())
+                .ForMember(dest => dest.Customer, opt => opt.Ignore())
+                .ForMember(dest => dest.Hotel, opt => opt.Ignore());
 
             CreateMap<Booking, BookingResponseDto>()
-                //.ForMember(dest => dest.CustomerFullName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.FullName : string.Empty))
-                .ForMember(dest => dest.HotelName, opt => opt.MapFrom(src => src.Hotel.Name))
-                .ForMember(dest => dest.RoomsBookedCount, static opt => opt.MapFrom(static src => src.BookingRooms.Select(br => new RoomDetailsDto
+                .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.HotelName, opt => opt.MapFrom(src => src.Hotel != null ? src.Hotel.Name : "Unknown Hotel"))
+                .ForMember(dest => dest.RoomsBooked, opt => opt.MapFrom(src => src.BookingRooms.Select(br => new RoomDetailsDto
                 {
                     RoomId = br.Room.Id,
                     RoomNumber = br.Room.RoomNumber,
                     RoomType = br.Room.Type,
                     PricePerNight = br.Room.PricePerNight
                 }).ToList()))
+                .ForMember(dest => dest.RoomsBookedCount, opt => opt.MapFrom(src => src.BookingRooms.Count))
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice));
 
             // ✅ BookingRoom Mapping  

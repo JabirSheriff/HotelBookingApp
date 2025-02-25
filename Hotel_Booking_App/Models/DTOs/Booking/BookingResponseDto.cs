@@ -9,7 +9,7 @@ namespace Hotel_Booking_App.Models.DTOs.Booking
         public int BookingId { get; set; }
         public int HotelId { get; set; }
         public string HotelName { get; set; }
-        //public List<RoomDetailsDto> RoomsBooked { get; set; }
+        public List<RoomDetailsDto> RoomsBooked { get; set; }
         public int RoomsBookedCount { get; set; }
         public DateTime CheckInDate { get; set; }
         public DateTime CheckOutDate { get; set; }

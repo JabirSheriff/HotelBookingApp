@@ -23,7 +23,13 @@ namespace Hotel_Booking_App.Services
 
         // ...
 
-        
+        public async Task<IEnumerable<HotelResponseDto>> GetAllHotelsAsync()
+        {
+            var hotels = await _hotelRepository.GetAllHotelsAsync();
+            return _mapper.Map<IEnumerable<HotelResponseDto>>(hotels);
+        }
+
+
 
         public async Task<HotelResponseDto> AddHotelAsync(int ownerId, AddHotelDto dto)
         {

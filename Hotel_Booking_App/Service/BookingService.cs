@@ -1,117 +1,94 @@
 ﻿using AutoMapper;
 using Hotel_Booking_App.Interface.Bookings;
-using Hotel_Booking_App.Models.DTOs.Booking;
 using Hotel_Booking_App.Models;
-using Hotel_Booking_App.Exceptions;
+using Hotel_Booking_App.Models.DTOs.Booking;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Hotel_Booking_App.Service
+public class BookingService : IBookingService
 {
-    public class BookingService : IBookingService
+    private readonly IBookingRepository _bookingRepository;
+    private readonly IMapper _mapper;
+
+    public BookingService(IBookingRepository bookingRepository, IMapper mapper)
     {
-        private readonly IBookingRepository _bookingRepository;
-        private readonly IMapper _mapper;
+        _bookingRepository = bookingRepository;
+        _mapper = mapper;
+    }
 
-        public BookingService(IBookingRepository bookingRepository, IMapper mapper)
+    public async Task<BookingResponseDto> CreateBookingAsync(int customerId, BookingRequestDto requestDto)
+    {
+        var roomType = (RoomType)requestDto.RoomType;
+
+        var availableRooms = await _bookingRepository.GetAvailableRoomsAsync(
+            requestDto.HotelId,
+            requestDto.NumberOfRooms,
+            roomType,
+            requestDto.NumberOfGuests,
+            requestDto.CheckInDate,
+            requestDto.CheckOutDate
+        );
+
+        if (availableRooms.Count < requestDto.NumberOfRooms)
+            throw new Exception($"Only {availableRooms.Count} room(s) available for the selected dates.");
+
+        var booking = _mapper.Map<Booking>(requestDto);
+        booking.CustomerId = customerId;
+        booking.Status = BookingStatus.Pending;
+
+        // ✅ Fix the night calculation
+        var checkInDate = requestDto.CheckInDate.Date;
+        var checkOutDate = requestDto.CheckOutDate.Date;
+        var numberOfNights = (checkOutDate - checkInDate).Days;
+
+        if (numberOfNights <= 0)
+            throw new Exception("Check-out date must be after check-in date.");
+
+        booking.TotalPrice = availableRooms.Sum(r => r.PricePerNight) * numberOfNights;
+
+        foreach (var room in availableRooms)
         {
-            _bookingRepository = bookingRepository;
-            _mapper = mapper;
+            booking.BookingRooms.Add(new BookingRoom { RoomId = room.Id });
         }
 
-        public async Task<BookingResponseDto> CreateBookingAsync(int userId, BookingRequestDto requestDto)
-        {
-            var customer = await _bookingRepository.GetCustomerByUserIdAsync(userId);
-            if (customer == null)
-                throw new UnauthorizedAccessException("Customer not found. Please log in.");
-
-            var availableRooms = await _bookingRepository.GetAvailableRoomsAsync(
-                requestDto.HotelId, requestDto.RoomType, requestDto.NumberOfRooms);
-
-            if (availableRooms.Count < requestDto.NumberOfRooms)
-                throw new Exception("Not enough rooms available.");
-
-            var totalDays = (requestDto.CheckOutDate - requestDto.CheckInDate).Days;
-            var totalPrice = availableRooms.Sum(r => r.PricePerNight) * totalDays;
-
-            var booking = new Booking
-            {
-                CustomerId = customer.Id,
-                HotelId = requestDto.HotelId,
-                CheckInDate = requestDto.CheckInDate,
-                CheckOutDate = requestDto.CheckOutDate,
-                NumberOfGuests = requestDto.NumberOfGuests,
-                TotalPrice = totalPrice,
-                Status = BookingStatus.Pending,
-                SpecialRequest = requestDto.SpecialRequest,
-                BookingRooms = availableRooms.Select(room => new BookingRoom { RoomId = room.Id }).ToList()
-            };
-
-            var newBooking = await _bookingRepository.CreateBookingAsync(booking);
-
-            return new BookingResponseDto
-            {
-                BookingId = newBooking.Id,
-                HotelId = newBooking.HotelId,
-                HotelName = newBooking.Hotel?.Name ?? "Unknown Hotel",
-                CheckInDate = newBooking.CheckInDate,
-                CheckOutDate = newBooking.CheckOutDate,
-                NumberOfGuests = newBooking.NumberOfGuests,
-                TotalPrice = newBooking.TotalPrice,
-                Status = newBooking.Status,
-                SpecialRequest = requestDto.SpecialRequest,
-                //RoomsBooked = availableRooms.Select(r => new RoomDetailsDto
-                //{
-                //    RoomId = r.Id,
-                //    RoomNumber = r.RoomNumber,
-                //    RoomType = r.Type,
-                //    PricePerNight = r.PricePerNight
-                //}).ToList()
-                // ✅ Return only the count of booked rooms
-                RoomsBookedCount = booking.BookingRooms.Count
-            };
+        await _bookingRepository.AddBookingAsync(booking);
+        return _mapper.Map<BookingResponseDto>(booking);
+    }
 
 
-        }
+    public async Task<BookingResponseDto?> GetBookingByIdAsync(int bookingId)
+    {
+        var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
 
-        // ✅ Get All Bookings by Customer
-        public async Task<List<BookingResponseDto>> GetAllBookingsByCustomerAsync(int customerId)
-        {
-            var bookings = await _bookingRepository.GetAllBookingsByCustomerAsync(customerId);
-            return _mapper.Map<List<BookingResponseDto>>(bookings);
-        }
+        if (booking == null)
+            return null;
 
-        // ✅ Get Booking by ID
-        public async Task<BookingResponseDto?> GetBookingByIdAsync(int bookingId)
-        {
-            var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
-            return booking == null ? null : _mapper.Map<BookingResponseDto>(booking);
-        }
+        var bookingDto = _mapper.Map<BookingResponseDto>(booking);
 
-        // ✅ Update Booking
-        public async Task<bool> UpdateBookingAsync(int bookingId, UpdateBookingRequestDto updateDto)
-        {
-            var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
-            if (booking == null)
-            {
-                throw new Exception("Booking not found.");
-            }
+        // ✅ Ensure HotelName is included
+        bookingDto.HotelName = booking.Hotel?.Name ?? "Unknown Hotel";
 
-            // Update fields
-            booking.CheckInDate = updateDto.CheckInDate;
-            booking.CheckOutDate = updateDto.CheckOutDate;
-            booking.NumberOfGuests = updateDto.NumberOfGuests;
-            booking.SpecialRequest = updateDto.SpecialRequest;
+        return bookingDto;
+    }
 
-            return await _bookingRepository.UpdateBookingAsync(booking);
-        }
+    public async Task<IEnumerable<BookingResponseDto>> GetAllBookingsByCustomerAsync(int customerId)
+    {
+        var bookings = await _bookingRepository.GetAllBookingsByCustomerAsync(customerId);
+        return bookings.Select(b => _mapper.Map<BookingResponseDto>(b));
+    }
 
-        // ✅ Delete Booking
-        public async Task<bool> DeleteBookingAsync(int bookingId)
-        {
-            var deleted = await _bookingRepository.DeleteBookingAsync(bookingId);
-            if (!deleted)
-                throw new NotFoundException("Booking not found");
+    public async Task<bool> UpdateBookingAsync(int bookingId, UpdateBookingRequestDto updateDto)
+    {
+        var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
+        if (booking == null) return false;
 
-            return true;
-        }
+        booking.SpecialRequest = updateDto.SpecialRequest;
+        return await _bookingRepository.UpdateBookingAsync(booking);
+    }
+
+    public async Task<bool> DeleteBookingAsync(int bookingId)
+    {
+        return await _bookingRepository.DeleteBookingAsync(bookingId);
     }
 }

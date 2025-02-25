@@ -9,7 +9,7 @@ namespace Hotel_Booking_App.Models.DTOs.Booking
         public int HotelId { get; set; }
 
         [Required]
-        public RoomType RoomType { get; set; }  // Specify the type of room
+        public int RoomType { get; set; }  // Specify the type of room
 
         [Required]
         [Range(1, 10, ErrorMessage = "You can book between 1 and 10 rooms.")]
@@ -24,6 +24,9 @@ namespace Hotel_Booking_App.Models.DTOs.Booking
 
         [Required]
         public DateTime CheckOutDate { get; set; }
+
+        //[Required]
+        //public List<int> RoomIds { get; set; } // ✅ Fix: Add RoomIds
 
         public string? SpecialRequest { get; set; }
     }

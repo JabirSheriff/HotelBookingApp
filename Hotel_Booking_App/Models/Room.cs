@@ -27,7 +27,8 @@ namespace Hotel_Booking_App.Models
 
         [Required]
         public int Capacity { get; set; }
-        
+        public int RoomTypeId { get; set; }
+
 
         // ✅ Fixed Foreign Key for Hotel
         [Required]
@@ -42,9 +43,9 @@ namespace Hotel_Booking_App.Models
 
     public enum RoomType
     {
-        Single,
-        Double,
-        Suite,
-        Deluxe
+        Single = 1,
+        Double = 2,
+        Suite = 3,
+        Deluxe = 4
     }
 }

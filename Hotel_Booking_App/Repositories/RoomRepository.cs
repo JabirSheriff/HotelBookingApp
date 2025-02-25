@@ -17,15 +17,23 @@ namespace Hotel_Booking_App.Repositories
             _context = context;
         }
 
-        public async Task AddRoomAsync(Room room)
+        public async Task<bool> IsRoomAvailableAsync(int roomId, DateTime checkInDate, DateTime checkOutDate)
+        {
+            var roomExists = await _context.Rooms.AnyAsync(r => r.Id == roomId);
+            if (!roomExists) return false;
+
+            return !await _context.BookingRooms
+                .AnyAsync(br =>
+                    br.RoomId == roomId &&
+                    ((checkInDate >= br.CheckInDate && checkInDate < br.CheckOutDate) ||
+                    (checkOutDate > br.CheckInDate && checkOutDate <= br.CheckOutDate) ||
+                    (checkInDate <= br.CheckInDate && checkOutDate >= br.CheckOutDate)));
+
+        }
+        public async Task<bool> AddRoomAsync(Room room)
         {
             await _context.Rooms.AddAsync(room);
-            var saved = await _context.SaveChangesAsync();
-
-            if (saved <= 0)
-            {
-                throw new Exception("Failed to save room.");
-            }
+            return await _context.SaveChangesAsync() > 0;  // ✅ Correct return statement
         }
 
         public async Task<Room?> GetRoomByIdAsync(int roomId)
@@ -42,6 +50,29 @@ namespace Hotel_Booking_App.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Room>> GetAvailableRoomsAsync(int hotelId, int roomType, DateTime checkIn, DateTime checkOut)
+        {
+            var bookedRoomIds = await _context.BookingRooms
+    .Where(br => br.Room.HotelId == hotelId &&
+               ((checkIn >= br.CheckInDate && checkIn < br.CheckOutDate) ||
+                (checkOut > br.CheckInDate && checkOut <= br.CheckOutDate) ||
+                (checkIn <= br.CheckInDate && checkOut >= br.CheckOutDate)))
+    .Select(br => br.RoomId)
+    .Distinct()
+    .ToListAsync();
+
+            return await _context.Rooms
+     .Where(r => r.HotelId == hotelId &&
+                 (int)r.Type == roomType &&
+                 !_context.BookingRooms
+                     .Any(br => br.RoomId == r.Id &&
+                                ((checkIn >= br.CheckInDate && checkIn < br.CheckOutDate) ||
+                                 (checkOut > br.CheckInDate && checkOut <= br.CheckOutDate) ||
+                                 (checkIn <= br.CheckInDate && checkOut >= br.CheckOutDate))))
+     .ToListAsync();
+        }
+
+
         public async Task<bool> UpdateRoomAsync(Room room)
         {
             _context.Rooms.Update(room);
@@ -53,6 +84,18 @@ namespace Hotel_Booking_App.Repositories
             _context.Rooms.Remove(room);
             return await _context.SaveChangesAsync() > 0;
         }
+
+        public async Task<List<Room>> GetRoomsByIdsAsync(List<int> roomIds)
+        {
+            return await _context.Rooms.Where(r => roomIds.Contains(r.Id)).ToListAsync();
+        }
+
+        public async Task UpdateRoomsAsync(List<Room> rooms)
+        {
+            _context.Rooms.UpdateRange(rooms);
+            await _context.SaveChangesAsync();
+        }
+
 
         public async Task<bool> SaveChangesAsync()
         {

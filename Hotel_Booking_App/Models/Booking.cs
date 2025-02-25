@@ -16,6 +16,8 @@ namespace Hotel_Booking_App.Models
         public int HotelId { get; set; }  // Foreign key
         public Hotel Hotel { get; set; }  // Navigation property
 
+        public int RoomId { get; set; }
+
 
         [Required]
         public DateTime CheckInDate { get; set; }
