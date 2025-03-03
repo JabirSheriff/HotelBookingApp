@@ -3,6 +3,8 @@ using Hotel_Booking_App.Models;
 using Hotel_Booking_App.Models.DTOs.Hotel_Room;
 using Hotel_Booking_App.Models.DTOs.Booking;
 using Hotel_Booking_App.Interface.Hotel_Room;
+using Hotel_Booking_App.Models.DTOs.Review;
+using HotelBookingApp.Models;
 
 namespace Hotel_Booking_App.Mappings
 {
@@ -14,7 +16,10 @@ namespace Hotel_Booking_App.Mappings
             CreateMap<AddHotelDto, Hotel>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-            CreateMap<Hotel, HotelResponseDto>();
+            CreateMap<Hotel, HotelResponseDto>()
+                .ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => src.Reviews));
+
+            CreateMap<Review, ReviewResponseDto>();
 
             // ✅ Room Mapping  
             CreateMap<Room, RoomRequestDto>().ReverseMap();

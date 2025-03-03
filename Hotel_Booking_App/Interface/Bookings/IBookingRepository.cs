@@ -1,15 +1,19 @@
 ﻿using Hotel_Booking_App.Models;
+using HotelBookingApp.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Hotel_Booking_App.Interface.Bookings
+namespace HotelBookingApp.Interfaces
 {
     public interface IBookingRepository
     {
-        Task<bool> AddBookingAsync(Booking booking);
-        Task<List<Room>> GetAvailableRoomsAsync(int hotelId, int numberOfRooms, RoomType roomType, int numberOfGuests, DateTime checkIn, DateTime checkOut);
+        Task<Booking> AddBookingAsync(Booking booking);
         Task<Booking?> GetBookingByIdAsync(int bookingId);
-        Task<IEnumerable<Booking>> GetAllBookingsByCustomerAsync(int customerId);
+        Task<List<Booking>> GetBookingsByCustomerIdAsync(int customerId);
+        Task<List<Room>> GetAvailableRoomsAsync(int hotelId, int numberOfRooms, RoomType roomType, int numberOfGuests, DateTime checkIn, DateTime checkOut); // Updated to 6 args
         Task<bool> UpdateBookingAsync(Booking booking);
         Task<bool> DeleteBookingAsync(int bookingId);
-        Task<bool> SaveChangesAsync();
+        Task<List<Booking>> GetBookingsByHotelIdsAsync(List<int> hotelIds);
+
     }
 }

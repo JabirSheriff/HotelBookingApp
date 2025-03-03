@@ -2,6 +2,7 @@
 using Hotel_Booking_App.Interface;
 using Hotel_Booking_App.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace Hotel_Booking_App.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowAllOrigins")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -92,6 +94,30 @@ namespace Hotel_Booking_App.Controller
         //        return StatusCode(500, new { error = "An error occurred while updating profile." });
         //    }
         //}
+
+        [HttpGet("users")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var users = await _userRepository.GetAllUsersAsync();
+                var response = users.Select(u => new UserRegistrationResponseDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    Role = u.Role,
+                    PhoneNumber = u.PhoneNumber
+                });
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] GetAllUsers: {ex}");
+                return StatusCode(500, new { error = "Failed to fetch users." });
+            }
+        }
 
 
         [Authorize]

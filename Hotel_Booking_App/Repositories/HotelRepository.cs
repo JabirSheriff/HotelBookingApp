@@ -1,6 +1,7 @@
 ﻿using Hotel_Booking_App.Contexts;
 using Hotel_Booking_App.Interface.Hotel_Room;
 using Hotel_Booking_App.Models;
+using Hotel_Booking_App.Models.DTOs.Hotel_Room;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -29,7 +30,12 @@ namespace Hotel_Booking_App.Repositories
                 .ToListAsync();
         }
 
-
+        public async Task<List<Room>> GetRoomsByHotelIdAsync(int hotelId)
+        {
+            return await _context.Rooms
+                .Where(r => r.HotelId == hotelId)
+                .ToListAsync();
+        }
 
         public async Task<Hotel?> GetHotelByIdAsync(int hotelId)
         {
@@ -42,8 +48,37 @@ namespace Hotel_Booking_App.Repositories
         {
             return await _context.Hotels
                 //.Include(h => h.Rooms)
+                .Include(h => h.Reviews)
+                .ThenInclude(r => r.Customer)
                 .ToListAsync();
         }
+
+        public async Task<List<Hotel>> SearchHotelsAsync(HotelSearchRequestDto searchParams)
+        {
+            var query = _context.Hotels
+                .Include(h => h.Rooms)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchParams.City))
+                query = query.Where(h => h.City == searchParams.City);
+
+            if (!string.IsNullOrEmpty(searchParams.Country))
+                query = query.Where(h => h.Country == searchParams.Country);
+
+            if (searchParams.MinStarRating.HasValue)
+                query = query.Where(h => h.StarRating >= searchParams.MinStarRating);
+
+            if (searchParams.MaxStarRating.HasValue)
+                query = query.Where(h => h.StarRating <= searchParams.MaxStarRating);
+
+            if (searchParams.OnlyAvailableRooms == true)
+                query = query.Where(h => h.Rooms.Any(r => r.IsAvailable));
+
+            var hotels = await query.ToListAsync();
+            return hotels;
+        }
+
+
 
         public async Task UpdateHotelAsync(Hotel hotel)
         {

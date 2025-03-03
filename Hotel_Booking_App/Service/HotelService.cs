@@ -60,6 +60,39 @@ namespace Hotel_Booking_App.Services
             return await _hotelRepository.GetHotelByIdAsync(hotelId); // Fetch full entity
         }
 
+        public async Task<List<HotelResponseDto>> SearchHotelsAsync(HotelSearchRequestDto searchParams)
+        {
+            var hotels = await _hotelRepository.SearchHotelsAsync(searchParams);
+
+            return hotels.Select(h => new HotelResponseDto
+            {
+                Id = h.Id,
+                Name = h.Name,
+                Address = h.Address,
+                City = h.City,
+                Country = h.Country,
+                StarRating = h.StarRating,
+                Description = h.Description,
+                ContactEmail = h.ContactEmail,
+                ContactPhone = h.ContactPhone,
+                IsActive = h.IsActive,
+                HotelOwnerId = h.HotelOwnerId,
+                Rooms = h.Rooms.Where(r => searchParams.OnlyAvailableRooms != true || r.IsAvailable)
+                               .Select(r => new RoomResponseDto
+                               {
+                                   Id = r.Id,
+                                   RoomNumber = r.RoomNumber,
+                                   Type = r.Type,
+                                   Description = r.Description,
+                                   PricePerNight = r.PricePerNight,
+                                   IsAvailable = r.IsAvailable,
+                                   Capacity = r.Capacity,
+                                   HotelId = r.HotelId
+                               }).ToList()
+            }).ToList();
+        }
+
+
 
 
 

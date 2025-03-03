@@ -53,98 +53,7 @@ namespace Hotel_Booking_App.Service
             };
         }
 
-        //public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
-        //{
-        //    var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
-        //    if (user == null)
-        //        throw new Exception("User not found.");
-
-        //    using var hmac = new HMACSHA512(user.PasswordSalt);
-        //    var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
-
-        //    if (!computedHash.SequenceEqual(user.PasswordHash))
-        //        throw new Exception("Invalid password.");
-
-        //    // Check if the user's role is assigned
-        //    if (user.Role == "Unassigned")
-        //    {
-        //        return new LoginResponseDto
-        //        {
-
-        //            Message = "Login successful, but role is not assigned. Please contact Admin.",
-        //            Token = null,
-        //            FullName = user.FullName,
-        //            Email = user.Email,
-        //            Role = user.Role
-        //        };
-        //    }
-
-        //    // ✅ Fetch HotelOwner ID
-        //    int? hotelOwnerId = null;
-        //    if (user.Role == "HotelOwner")
-        //    {
-        //        var hotelOwner = await _userRepository.GetHotelOwnerByUserIdAsync(user.Id);
-        //        hotelOwnerId = hotelOwner?.Id;  // Get HotelOwner ID
-        //    }
-
-        //    // ✅ Fetch Customer ID
-        //    int? CustomerId = null;
-        //    if (user.Role == "Customer")
-        //    {
-        //        var Customer = await _userRepository.GetCustomerByUserIdAsync(user.Id);
-        //        CustomerId = Customer?.Id;  
-        //    }
-
-        //    // 🔥 Ensure JWT Secret Key is loaded properly
-        //    var secretKey = _configuration["Jwt:Secret"];
-        //    if (string.IsNullOrEmpty(secretKey))
-        //        throw new Exception("JWT Secret Key is missing in configuration.");
-
-        //    var key = Encoding.UTF8.GetBytes(secretKey);
-
-        //    // ✅ Add Role, Email, and ID claims properly
-        //    var claims = new List<Claim>
-        //    {
-        //        new Claim("nameId", user.Id.ToString()),
-        //        new Claim(ClaimTypes.Email, user.Email),
-        //        new Claim(ClaimTypes.Role, user.Role)
-        //    };
-
-        //    if (hotelOwnerId.HasValue)
-        //        claims.Add(new Claim("hotelOwnerId", hotelOwnerId.Value.ToString()));
-        //    if(CustomerId.HasValue)
-        //        claims.Add(new Claim("CustomerId", CustomerId.Value.ToString()));
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var tokenDescriptor = new SecurityTokenDescriptor
-        //    {
-        //        Subject = new ClaimsIdentity(claims),
-        //        Expires = DateTime.UtcNow.AddDays(7),
-        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        //    };
-
-        //    var token = tokenHandler.CreateToken(tokenDescriptor);
-        //    string jwtToken = tokenHandler.WriteToken(token);
-
-        //    // ✅ Ensure Role-Based Messages in Response
-        //    string welcomeMessage = user.Role switch
-        //    {
-        //        "Admin" => "Welcome to Admin Dashboard",
-        //        "Customer" => "Welcome to Hotel Booking App",
-        //        "HotelOwner" => "Welcome to Hotel Booking Dashboard",
-        //        _ => "Unauthorized access"
-        //    };
-
-        //    return new LoginResponseDto
-        //    {
-        //        FullName = user.FullName,  // ✅ Send Full Name
-        //        Email = user.Email,  // ✅ Send Email
-        //        Role = user.Role,
-        //        //HotelOwnerId = hotelOwnerId,
-        //        //CustomerId = CustomerId,
-        //        Message = welcomeMessage,
-        //        Token = jwtToken
-        //    };
-        //}
+        
 
         public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
         {
@@ -265,14 +174,39 @@ namespace Hotel_Booking_App.Service
 
             var customer = new Customer
             {
-                UserId = user.Id,  // ✅ Associate customer with the User
+                UserId = user.Id,
                 FullName = user.FullName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
             };
 
-            await _userRepository.AddCustomerAsync(customer); // ✅ Save customer details
+            await _userRepository.AddCustomerAsync(customer);
             await _userRepository.SaveChangesAsync();
+
+            // Generate JWT token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var secretKey = _configuration["Jwt:Secret"];
+            if (string.IsNullOrEmpty(secretKey))
+                throw new Exception("JWT Secret Key is missing in configuration.");
+
+            var key = Encoding.UTF8.GetBytes(secretKey);
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role),
+        new Claim("customerId", customer.Id.ToString()) // Add customerId to token
+    };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            string jwtToken = tokenHandler.WriteToken(token);
 
             return new UserRegistrationResponseDto
             {
@@ -281,10 +215,11 @@ namespace Hotel_Booking_App.Service
                 Email = user.Email,
                 Role = user.Role,
                 PhoneNumber = user.PhoneNumber,
+                Token = jwtToken // Include token
             };
         }
 
-        
+
         public async Task<bool> UpdateUserProfileAsync(int userId, UpdateUserDto updateUserDto)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);

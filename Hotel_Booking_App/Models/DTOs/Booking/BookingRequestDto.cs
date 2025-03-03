@@ -4,7 +4,7 @@ using Hotel_Booking_App.Models;
 namespace Hotel_Booking_App.Models.DTOs.Booking
 {
     public class BookingRequestDto
-    {
+    {    
         [Required]
         public int HotelId { get; set; }
 

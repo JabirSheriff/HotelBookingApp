@@ -8,7 +8,7 @@ namespace Hotel_Booking_App.Models.DTOs.Payment
         public int BookingId { get; set; }
         public decimal AmountPaid { get; set; }
         public string PaymentMethod { get; set; }
-        public DateTime PaymentDate { get; set; }
+        public DateTime? PaymentDate { get; set; }
         public string PaymentStatus { get; set; } // "Paid"
 
         // Booking Details

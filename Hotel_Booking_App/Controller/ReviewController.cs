@@ -1,57 +1,87 @@
-﻿//using Hotel_Booking_App.Exceptions;
-//using Hotel_Booking_App.Interface.Review;
-//using Hotel_Booking_App.Models.DTOs.Review;
-//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Mvc;
-//using System.Security.Claims;
+﻿using Hotel_Booking_App.Exceptions;
+using Hotel_Booking_App.Interface.Review;
+using Hotel_Booking_App.Models.DTOs.Review;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-//namespace Hotel_Booking_App.Controllers
-//{
-//    [ApiController]
-//    [Route("api/reviews")]
-//    [Authorize]
-//    public class ReviewController : ControllerBase
-//    {
-//        private readonly IReviewService _reviewService;
-//        private readonly ICustomerService _customerService;
+namespace Hotel_Booking_App.Controllers
+{
+    [ApiController]
+    [EnableCors("AllowAllOrigins")]
+    [Route("api/reviews")]
+    public class ReviewController : ControllerBase
+    {
+        private readonly IReviewService _reviewService;
+        private readonly ICustomerService _customerService;
 
-//        public ReviewController(IReviewService reviewService)
-//        {
-//            _reviewService = reviewService;
-            
-//        }
-//        [HttpPost("Add Reviews")]
-//        public async Task<IActionResult> AddReview([FromBody] ReviewRequestDto request)
-//        {
-//            if (!ModelState.IsValid)
-//                return BadRequest(ModelState);
+        public ReviewController(IReviewService reviewService, ICustomerService customerService)
+        {
+            _reviewService = reviewService;
+            _customerService = customerService;
+        }
 
-//            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        // ✅ Add a new review (Authenticated or Anonymous)
+        [HttpPost]
+        [AllowAnonymous]  // Allowing anonymous reviews
+        public async Task<IActionResult> AddReview([FromBody] ReviewRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-//            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-//            {
-//                return Unauthorized("Invalid token: User ID is missing.");
-//            }
+            int? customerId = null;
+            string customerName = "Anonymous";
 
-//            // Fetch CustomerId using UserId
-//            var customer = await _customerService.GetCustomerByUserIdAsync(userId);
-//            if (customer == null)
-//            {
-//                return Unauthorized("Customer account not found.");
-//            }
+            // If the user is authenticated, get their details
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    var customer = await _customerService.GetCustomerByUserIdAsync(userId);
+                    if (customer != null)
+                    {
+                        customerId = customer.Id;
+                        customerName = customer.FullName;
+                    }
+                }
+            }
 
-//            var review = await _reviewService.AddReviewAsync(request, customer.Id);
-//            return Ok(review);
-//        }
+            var review = await _reviewService.AddReviewAsync(request, customerId, customerName);
+            return Ok(review);
+        }
 
+        // ✅ Get reviews for a hotel
+        [HttpGet("{hotelId}")]
+        public async Task<IActionResult> GetReviewsByHotelId(int hotelId)
+        {
+            var reviews = await _reviewService.GetReviewsByHotelIdAsync(hotelId);
+            return Ok(reviews);
+        }
 
+        // ✅ Update a review (Only for authenticated users)
+        [HttpPut("{reviewId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] ReviewRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("Invalid token: User ID is missing.");
+            }
 
-//        [HttpGet("{Get Reviews}")]
-//        public async Task<IActionResult> GetReviewsByHotelId(int hotelId)
-//        {
-//            var reviews = await _reviewService.GetReviewsByHotelIdAsync(hotelId);
-//            return Ok(reviews);
-//        }
-//    }
-//}
+            var customer = await _customerService.GetCustomerByUserIdAsync(userId);
+            if (customer == null)
+            {
+                return Unauthorized("Customer account not found.");
+            }
+
+            var updatedReview = await _reviewService.UpdateReviewAsync(reviewId, request, customer.Id);
+            return Ok(updatedReview);
+        }
+    }
+}

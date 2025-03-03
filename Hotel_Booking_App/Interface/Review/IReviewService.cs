@@ -4,7 +4,8 @@ namespace Hotel_Booking_App.Interface.Review
 {
     public interface IReviewService
     {
-        Task<ReviewResponseDto> AddReviewAsync(ReviewRequestDto request, int customerId);
+        Task<ReviewResponseDto> AddReviewAsync(ReviewRequestDto request, int? customerId, string customerName);
         Task<List<ReviewResponseDto>> GetReviewsByHotelIdAsync(int hotelId);
+        Task<ReviewResponseDto> UpdateReviewAsync(int reviewId, ReviewRequestDto request, int customerId);
     }
 }

@@ -5,19 +5,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Cors;
+using HotelBookingApp.Interfaces;
 
 namespace Hotel_Booking_App.Controllers
 {
     [Route("api/hotels")]
     [ApiController]
+    [EnableCors("AllowAllOrigins")]
     [Authorize(Roles = "HotelOwner")]
     public class HotelController : ControllerBase
     {
         private readonly IHotelService _hotelService;
+        private readonly IBookingService _bookingService;
 
-        public HotelController(IHotelService hotelService)
+        public HotelController(IHotelService hotelService, IBookingService bookingService)
         {
             _hotelService = hotelService;
+            _bookingService = bookingService;
         }
 
         [HttpGet("all")]
@@ -61,6 +66,9 @@ namespace Hotel_Booking_App.Controllers
                 return NotFound("Hotel not found.");
             return Ok(hotel);
         }
+
+
+
 
         [HttpPatch("{hotelId}")]
         public async Task<IActionResult> UpdateHotel(int hotelId, [FromBody] JsonPatchDocument<AddHotelDto> patchDto)
@@ -108,5 +116,39 @@ namespace Hotel_Booking_App.Controllers
             if (!success) return NotFound("Hotel not found.");
             return Ok("Hotel deleted successfully.");
         }
+
+
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SearchHotels([FromQuery] HotelSearchRequestDto searchParams)
+        {
+            var hotels = await _hotelService.SearchHotelsAsync(searchParams);
+            return Ok(hotels);
+        }
+
+        // New endpoint for owner bookings
+        [HttpGet("bookings")]
+        public async Task<IActionResult> GetBookingsByOwner()
+        {
+            try
+            {
+                var ownerIdClaim = User.FindFirst("HotelOwnerId")?.Value;
+                if (ownerIdClaim == null)
+                    return Unauthorized("Invalid token or missing HotelOwnerId.");
+
+                int ownerId = int.Parse(ownerIdClaim);
+                var hotels = await _hotelService.GetHotelsByOwnerIdAsync(ownerId);
+                var hotelIds = hotels.Select(h => h.Id).ToList();
+
+                // Fetch bookings for these hotels
+                var bookings = await _bookingService.GetBookingsByHotelIdsAsync(hotelIds);
+                return Ok(bookings);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

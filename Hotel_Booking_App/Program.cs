@@ -10,10 +10,13 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Hotel_Booking_App.Mappings;
-using Hotel_Booking_App.Interface.Bookings;
+//using Hotel_Booking_App.Interface.Bookings;
 using Hotel_Booking_App.Interface.Payment;
 using Hotel_Booking_App.Interface.Review;
 using Hotel_Booking_App.Interface.Customer;
+using HotelBookingApp.Interfaces;
+using HotelBookingApp.Services;
+using HotelBookingApp.Repositories;
 
 
 namespace Hotel_Booking_App
@@ -23,6 +26,18 @@ namespace Hotel_Booking_App
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Add CORS services
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin() // Allows requests from any origin
+                              .AllowAnyMethod()  // Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
+                              .AllowAnyHeader(); // Allows any headers
+                    });
+            });
 
             // Register AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -97,13 +112,15 @@ namespace Hotel_Booking_App
             builder.Services.AddScoped<IPaymentService, PaymentService>();
 
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
+
 
             builder.Services.AddHostedService<BookingCleanupService>();
 
 
 
-            //builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-            //builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
 
 
             //builder.Services.AddAutoMapper(typeof(Program));
@@ -132,6 +149,9 @@ namespace Hotel_Booking_App
                 });
 
             var app = builder.Build();
+
+            // Use CORS before mapping controllers
+            app.UseCors("AllowAllOrigins");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

@@ -1,10 +1,11 @@
 ﻿using Hotel_Booking_App.Contexts;
+using Hotel_Booking_App.Interface.Review;
 using Hotel_Booking_App.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hotel_Booking_App.Service
 {
-    public class CustomerService
+    public class CustomerService : ICustomerService
     {
         private readonly HotelBookingDbContext _context;
 

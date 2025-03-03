@@ -1,4 +1,6 @@
-﻿namespace Hotel_Booking_App.Models.DTOs.Hotel_Room
+﻿using Hotel_Booking_App.Models.DTOs.Review;
+
+namespace Hotel_Booking_App.Models.DTOs.Hotel_Room
 {
     public class HotelResponseDto
     {
@@ -17,5 +19,6 @@
         //// ✅ Convert stored Amenities (comma-separated string) back to a list
         //public List<string>? Amenities { get; set; } = new List<string>();
         public List<RoomResponseDto> Rooms { get; set; } = new List<RoomResponseDto>();
+        public List<ReviewResponseDto> Reviews { get; set; } = new List<ReviewResponseDto>();
     }
 }

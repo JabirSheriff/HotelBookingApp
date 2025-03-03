@@ -2,6 +2,7 @@
 using Hotel_Booking_App.Interface.Hotel_Room;
 using Hotel_Booking_App.Models.DTOs.Hotel_Room;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace Hotel_Booking_App.Controllers
 {
     [Authorize(Roles = "HotelOwner")]
     [Route("api/rooms")]
+    [EnableCors("AllowAllOrigins")]
     [ApiController]
     public class RoomController : ControllerBase
     {

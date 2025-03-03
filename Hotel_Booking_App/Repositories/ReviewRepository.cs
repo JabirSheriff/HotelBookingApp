@@ -17,58 +17,31 @@ namespace Hotel_Booking_App.Repositories
             _context = context;
         }
 
-        public async Task<ReviewResponseDto> AddReviewAsync(ReviewRequestDto reviewRequest, int customerId)
+        public async Task<ReviewResponseDto> AddReviewAsync(ReviewRequestDto reviewRequest, int? customerId, string customerName)
         {
-            try
+            var review = new Review
             {
-                // Check if the customer exists
-                var customer = await _context.Customers.FindAsync(customerId);
-                if (customer == null)
-                {
-                    throw new EntityNotFoundException("Customer not found.");
-                }
+                CustomerId = customerId ?? 0, // 0 means anonymous
+                HotelId = reviewRequest.HotelId,
+                Rating = reviewRequest.Rating,
+                Comment = reviewRequest.Comment,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-                // Check if the hotel exists
-                var hotel = await _context.Hotels.FindAsync(reviewRequest.HotelId);
-                if (hotel == null)
-                {
-                    throw new EntityNotFoundException("Hotel not found.");
-                }
+            _context.Reviews.Add(review);
+            await _context.SaveChangesAsync();
 
-                // Create new review object
-                var review = new Review
-                {
-                    CustomerId = customerId,
-                    HotelId = reviewRequest.HotelId,
-                    Rating = reviewRequest.Rating,
-                    Comment = reviewRequest.Comment,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                _context.Reviews.Add(review);
-                await _context.SaveChangesAsync();
-
-                return new ReviewResponseDto
-                {
-                    ReviewId = review.Id,
-                    HotelId = review.HotelId,
-                    //CustomerName = customer.Name, // Ensuring customer exists
-                    Rating = review.Rating,
-                    Comment = review.Comment,
-                    CreatedAt = review.CreatedAt
-                };
-            }
-            catch (EntityNotFoundException ex)
+            return new ReviewResponseDto
             {
-                throw new EntityNotFoundException(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occurred while adding the review.", ex);
-            }
+                ReviewId = review.Id,
+                HotelId = review.HotelId,
+                CustomerName = customerId.HasValue ? customerName : "Anonymous",
+                Rating = review.Rating,
+                Comment = review.Comment,
+                CreatedAt = review.CreatedAt
+            };
         }
-
 
         public async Task<List<ReviewResponseDto>> GetReviewsByHotelIdAsync(int hotelId)
         {
@@ -79,12 +52,37 @@ namespace Hotel_Booking_App.Repositories
                 {
                     ReviewId = r.Id,
                     HotelId = r.HotelId,
-                    //CustomerName = r.Customer.Name,
+                    CustomerName = r.CustomerId != 0 ? r.Customer.FullName : "Anonymous",
                     Rating = r.Rating,
                     Comment = r.Comment,
                     CreatedAt = r.CreatedAt
                 })
                 .ToListAsync();
+        }
+
+        public async Task<ReviewResponseDto> UpdateReviewAsync(int reviewId, ReviewRequestDto request, int customerId)
+        {
+            var review = await _context.Reviews.FindAsync(reviewId);
+            if (review == null || review.CustomerId != customerId)
+            {
+                throw new UnauthorizedAccessException("You can only edit your own reviews.");
+            }
+
+            review.Rating = request.Rating;
+            review.Comment = request.Comment;
+            review.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new ReviewResponseDto
+            {
+                ReviewId = review.Id,
+                HotelId = review.HotelId,
+                CustomerName = review.Customer.FullName,
+                Rating = review.Rating,
+                Comment = review.Comment,
+                CreatedAt = review.CreatedAt
+            };
         }
     }
 }

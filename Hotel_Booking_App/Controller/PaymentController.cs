@@ -1,7 +1,9 @@
 ﻿using Hotel_Booking_App.Interface.Payment;
 using Hotel_Booking_App.Models.DTOs.Payment;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,6 +11,7 @@ namespace Hotel_Booking_App.Controllers
 {
     [Route("api/payments")]
     [ApiController]
+    [EnableCors("AllowAllOrigins")]
     [Authorize] // Ensuring only authenticated users can access
     public class PaymentController : ControllerBase
     {
@@ -19,25 +22,49 @@ namespace Hotel_Booking_App.Controllers
             _paymentService = paymentService;
         }
 
-        [HttpPost("process Payment")]
+        [HttpPost("process-payment")] // ✅ Fixed route naming
         public async Task<IActionResult> ProcessPayment([FromBody] PaymentRequestDto paymentRequest)
         {
-            var paymentResponse = await _paymentService.ProcessPaymentAsync(paymentRequest);
-            return Ok(paymentResponse);
+            if (paymentRequest == null)
+                return BadRequest("Invalid payment request.");
+
+            try
+            {
+                var paymentResponse = await _paymentService.ProcessPaymentAsync(paymentRequest);
+                return Ok(paymentResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("paid-bookings")]
         public async Task<ActionResult<List<PaymentResponseDto>>> GetPaidBookings()
         {
-            var paidBookings = await _paymentService.GetPaidBookingsAsync();
-            return Ok(paidBookings);
+            try
+            {
+                var paidBookings = await _paymentService.GetPaidBookingsAsync();
+                return Ok(paidBookings);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("unpaid-bookings")]
         public async Task<ActionResult<List<PaymentResponseDto>>> GetUnpaidBookings()
         {
-            var unpaidBookings = await _paymentService.GetUnpaidBookingsAsync();
-            return Ok(unpaidBookings);
+            try
+            {
+                var unpaidBookings = await _paymentService.GetUnpaidBookingsAsync();
+                return Ok(unpaidBookings);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

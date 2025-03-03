@@ -1,6 +1,7 @@
 ﻿using Hotel_Booking_App.Interface;
 using Hotel_Booking_App.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,7 @@ namespace Hotel_Booking_App.Controller
 {
     [ApiController]
     [Route("api/roles")]
+    [EnableCors("AllowAllOrigins")]
     [Authorize(Roles = "Admin")]
     public class RoleController : ControllerBase
     {

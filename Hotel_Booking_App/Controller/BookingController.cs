@@ -1,13 +1,18 @@
-﻿using Hotel_Booking_App.Interface.Bookings;
+﻿using Hotel_Booking_App.Models;
 using Hotel_Booking_App.Models.DTOs.Booking;
+using HotelBookingApp.Interfaces;
+using HotelBookingApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace Hotel_Booking_App.Controller
+namespace HotelBookingApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/booking")]
     [ApiController]
+    [Authorize(Roles = "Customer")]
     public class BookingController : ControllerBase
     {
         private readonly IBookingService _bookingService;
@@ -17,67 +22,71 @@ namespace Hotel_Booking_App.Controller
             _bookingService = bookingService;
         }
 
-        // ✅ Create Booking - Only Customers
-        [Authorize(Roles = "Customer")]
         [HttpPost("add")]
-        public async Task<IActionResult> CreateBooking([FromBody] BookingRequestDto requestDto)
+        public async Task<IActionResult> CreateBooking([FromBody] BookingRequestDto request)
         {
-            if (requestDto == null)
-                return BadRequest("Invalid booking request.");
-
-            if (requestDto.HotelId <= 0 || requestDto.NumberOfRooms <= 0)
-                return BadRequest("Hotel ID and Number of Rooms must be greater than zero.");
-
-            if (requestDto.CheckInDate >= requestDto.CheckOutDate)
-                return BadRequest("Check-out date must be after check-in date.");
-
-            // 🔥 Fix: Ensure `CustomerId` is retrieved correctly
-            var customerIdClaim = User.FindFirst("customerId")?.Value;
-            if (!int.TryParse(customerIdClaim, out int customerId))
-                return Unauthorized("Invalid customer ID.");
-
             try
             {
-                var result = await _bookingService.CreateBookingAsync(customerId, requestDto);
-                return Ok(result);
+                var customerId = int.Parse(User.FindFirst("customerId")?.Value ?? throw new UnauthorizedAccessException("Invalid customer ID"));
+
+                // Convert int RoomType to RoomType enum (frontend sends 0-3, backend expects 1-4)
+                var roomType = (RoomType)(request.RoomType + 1);
+
+                var booking = await _bookingService.CreateBookingAsync(
+                    customerId,
+                    request.HotelId,
+                    roomType,           // Pass converted RoomType
+                    request.CheckInDate,
+                    request.CheckOutDate,
+                    request.NumberOfRooms,
+                    request.NumberOfGuests,
+                    request.SpecialRequest
+                );
+                return Ok(booking);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
 
-        // ✅ Get Booking by ID (Only if Payment is Made)
-        [Authorize(Roles = "Customer, Admin")]
-        [HttpGet("{bookingId:int}")]
-        public async Task<IActionResult> GetBookingById(int bookingId)
+        [HttpGet("{bookingId}")]
+        public async Task<IActionResult> GetBooking(int bookingId)
         {
             var booking = await _bookingService.GetBookingByIdAsync(bookingId);
-            if (booking == null) return NotFound("Booking not found or payment not made.");
+            if (booking == null) return NotFound();
             return Ok(booking);
         }
 
-        // ✅ Update Booking (Allowed Anytime)
-        [Authorize(Roles = "Customer")]
-        [HttpPut("{bookingId:int}")]
-        public async Task<IActionResult> UpdateBooking(int bookingId, [FromBody] UpdateBookingRequestDto updateDto)
+        [HttpGet("customer")]
+        public async Task<IActionResult> GetCustomerBookings()
         {
-            if (updateDto == null)
-                return BadRequest("Invalid update request.");
-
-            var success = await _bookingService.UpdateBookingAsync(bookingId, updateDto);
-            if (!success) return NotFound("Booking not found.");
-            return Ok("Booking updated successfully.");
+            var customerId = int.Parse(User.FindFirst("customerId")?.Value ?? throw new UnauthorizedAccessException("Invalid customer ID"));
+            var bookings = await _bookingService.GetBookingsByCustomerIdAsync(customerId);
+            return Ok(bookings);
         }
 
-        // ✅ Delete Booking (Allowed Anytime)
-        [Authorize(Roles = "Customer")]
-        [HttpDelete("{bookingId:int}")]
+        [HttpPut("{bookingId}")]
+        public async Task<IActionResult> UpdateBooking(int bookingId, DateTime checkInDate, DateTime checkOutDate, int numberOfGuests, string? specialRequest)
+        {
+            try
+            {
+                var success = await _bookingService.UpdateBookingAsync(bookingId, checkInDate, checkOutDate, numberOfGuests, specialRequest);
+                if (!success) return NotFound();
+                return Ok("Booking updated");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("{bookingId}")]
         public async Task<IActionResult> DeleteBooking(int bookingId)
         {
             var success = await _bookingService.DeleteBookingAsync(bookingId);
-            if (!success) return NotFound("Booking not found.");
-            return Ok("Booking deleted successfully.");
+            if (!success) return NotFound();
+            return Ok("Booking deleted");
         }
     }
 }
